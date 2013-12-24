@@ -1,0 +1,83 @@
+<?xml version="1.0"?>
+<!--
+  #%L
+  drools-server
+  $Id:$
+  $HeadURL:$
+  %%
+  Copyright (C) 2013 Leadware
+  %%
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+  
+       http://www.apache.org/licenses/LICENSE-2.0
+  
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+  #L%
+  -->
+
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	
+	<!-- Pom model version -->
+	<modelVersion>4.0.0</modelVersion>
+	
+	<!-- Parent Project Identity -->
+	<parent>
+		<artifactId>drools-server</artifactId>
+		<groupId>net.leadware</groupId>
+		<version>0.0.1-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+	</parent>
+	
+	<!-- Artifact ID -->
+  	<artifactId>drools-server-model</artifactId>
+  	
+	<!-- Project Packaging -->
+	<packaging>jar</packaging>
+	
+	<!-- Project name -->
+	<name>DROOLS SERVER :: Model</name>
+	
+	<!-- Project description -->
+	<description>Project Model Component</description>
+	
+	<!-- Project dependencies -->
+	<dependencies>
+		
+	</dependencies>
+	
+	<!-- Project Build -->
+	<build>
+		
+		<!-- Build Plugin -->
+		<plugins>
+			
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>jaxb2-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>generate-configuration-pojo</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>xjc</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${basedir}/src/main/java</outputDirectory>
+							<packageName>net.leadware.drools.server.model.configuration</packageName>
+							<schemaDirectory>${basedir}/src/main/resources/xsd</schemaDirectory>
+							<schemaFiles>drools-server-configuration.xsd</schemaFiles>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			
+		</plugins>
+	</build>
+	
+</project>
