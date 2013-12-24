@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!--
   #%L
-  drools-server
+  DROOLS SERVER
   $Id:$
   $HeadURL:$
   %%
@@ -35,33 +35,19 @@
 	</parent>
 	
 	<!-- Artifact ID -->
-  	<artifactId>drools-server-engine</artifactId>
+  	<artifactId>drools-server-tools</artifactId>
   	
 	<!-- Project Packaging -->
 	<packaging>jar</packaging>
 	
 	<!-- Project name -->
-	<name>DROOLS SERVER :: Engine</name>
+	<name>DROOLS SERVER :: Tools</name>
 	
 	<!-- Project description -->
-	<description>Project Engine Component</description>
+	<description>Project Tools Component</description>
 	
 	<!-- Project dependencies -->
 	<dependencies>
-		
-		<!-- Drools Server Model Dependency -->
-		<dependency>
-			<groupId>net.leadware</groupId>
-			<artifactId>drools-server-model</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		
-		<!-- Drools Server Tools Dependency -->
-		<dependency>
-			<groupId>net.leadware</groupId>
-			<artifactId>drools-server-tools</artifactId>
-			<version>${project.version}</version>
-		</dependency>
 		
 		<!-- JUnit Depenndy -->
 		<dependency>

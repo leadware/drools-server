@@ -22,7 +22,21 @@ package net.leadware.drools.server.engine.configuration;
  * #L%
  */
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+
+import javax.xml.XMLConstants;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+
 import net.leadware.drools.server.model.configuration.DroolsServerConfiguration;
+import net.leadware.drools.server.tools.ENVHelper;
 
 /**
  * Classe representant l'initialiseur de configuration du serveur
@@ -30,6 +44,11 @@ import net.leadware.drools.server.model.configuration.DroolsServerConfiguration;
  * @since 24 déc. 2013 - 14:26:34
  */
 public class DroolsServerConfigurationInitializer {
+	
+	/**
+	 * Localisation du schema de validation du fichier de configuration server dans le classpath
+	 */
+	public static final String SCHEMA_LOCATION = "xsd/drools-server-configuration.xsd";
 	
 	/**
 	 * Chemin du fichier de configuration
@@ -105,6 +124,7 @@ public class DroolsServerConfigurationInitializer {
 	 * @param inClasspath champ inClasspath a modifier
 	 */
 	public void setInClasspath(boolean inClasspath) {
+		
 		// Modification de la valeur du champ
 		this.inClasspath = inClasspath;
 	}
@@ -134,7 +154,113 @@ public class DroolsServerConfigurationInitializer {
 	 * @return	Objet de configuration initialise
 	 */
 	public DroolsServerConfiguration initConfiguration() {
+
+		// Contexte JAXB
+		JAXBContext context = null;
 		
-		return null;
+		// Creation d'un Unmarshaller
+		Unmarshaller unmarshaller = null;
+
+		// Stream sur le fichier de configuration
+		InputStream configurationStream = null;
+		
+		try {
+			
+			// Contexte JAXB
+			context = JAXBContext.newInstance(DroolsServerConfiguration.class.getPackage().getName());
+			
+		} catch (JAXBException e) {
+			
+			// On relance
+			throw new RuntimeException("Erreur lors de l'initialisation du contexte JAXB", e);
+		}
+		
+		try {
+			
+			// Creation d'un Unmarshaller
+			unmarshaller = context.createUnmarshaller();
+			
+		} catch (JAXBException e) {
+			
+			// On relance
+			throw new RuntimeException("Erreur lors de l'initialisation de l'Unmarshaller JAXB", e);
+		}
+		
+		// Validation non requise
+		unmarshaller.setSchema(null);
+		
+		// Si la validation est requise
+		if(validateConfiguration) {
+			
+			// Positionnement du schema
+			unmarshaller.setSchema(loadConfigurationSchema());
+		}
+		
+		// Si le fichier est charge depuis le classpath
+		if(inClasspath) {
+			
+			// Chargement du Stream sur le fichier de configuration
+			configurationStream = getClass().getClassLoader().getResourceAsStream(configurationPath);
+			
+			// Si le stream est null
+			if(configurationStream == null) throw new RuntimeException("Erreur lors du chargement du ficher de configuration du serveur (Fichier introuvable) : [classpath:" + configurationPath + "]"); 
+			
+		} else {
+			
+			// Un File sur le chemin resolu en ENV
+			File configurationFile = new File(ENVHelper.resolveEnvironmentsParameters(configurationPath));
+			
+			try {
+				
+				// Chargement du Stream sur le fichier de configuration
+				configurationStream = new FileInputStream(configurationFile);
+				
+			} catch (FileNotFoundException e) {
+				
+				// On relance
+				throw new RuntimeException("Erreur lors du chargement du ficher de configuration du serveur (Fichier introuvable) : " + configurationPath);
+			}
+		}
+		
+		try {
+			
+			// On deserialise
+			return (DroolsServerConfiguration) unmarshaller.unmarshal(configurationStream);
+			
+		} catch (JAXBException e) {
+			
+			// On relance
+			throw new RuntimeException("Erreur lors de la deserialisation du ficher de configuration du serveur : " + configurationPath);
+		}
+	}
+	
+	/**
+	 * Methode permettant de charger le schema XSD du fichier de configuration
+	 * @return Schema a retourner
+	 */
+	private Schema loadConfigurationSchema() {
+		
+		// Fabrique de schema
+		SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+		
+		// Un stream sur la localisation du schema
+		InputStream stream = getClass().getClassLoader().getResourceAsStream(SCHEMA_LOCATION);
+		
+		// Si le stream est null
+		if(stream == null) throw new RuntimeException("Erreur lors du chargement du schema de validation du ficcher de configuration du serveur: [classpath:" + SCHEMA_LOCATION + "]");
+		
+		try {
+			
+			// Construction du schema
+			Schema schema = factory.newSchema(new StreamSource(stream));
+			
+			// On retourne le schema
+			return schema;
+			
+		} catch (Exception e) {
+			
+			// On relance
+			throw new RuntimeException("Erreur lors du chargement du schema de validation du ficcher de configuration du serveur: [classpath:" + SCHEMA_LOCATION + "]", e);
+		}
 	}
 }
