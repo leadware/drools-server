@@ -40,7 +40,7 @@
 	<artifactId>drools-server</artifactId>
 	
 	<!-- Project name -->
-	<name>drools-server</name>
+	<name>DROOLS SERVER</name>
 	
 	<!-- Project description -->
 	<description>Drools Remote Execution Server</description>
