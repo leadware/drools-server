@@ -28,10 +28,12 @@ package net.leadware.drools.server.engine;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.drools.KnowledgeBase;
 import org.drools.runtime.StatefulKnowledgeSession;
 import org.drools.runtime.StatelessKnowledgeSession;
 
 import net.leadware.drools.server.engine.configuration.DroolsServerConfigurationInitializer;
+import net.leadware.drools.server.model.configuration.KnowledgeBaseConfiguration;
 
 /**
  * Classe representant le server drools
@@ -54,4 +56,13 @@ public class DroolsServer {
 	 * Map des sessions stateless
 	 */
 	private Map<String, StatelessKnowledgeSession> statelessSessions = new HashMap<String, StatelessKnowledgeSession>();
+	
+	/**
+	 * Methode permettant de construire une base de connaissance a partir de la base de connaissance configuree
+	 * @param configurationKnowledgeBase	
+	 * @return
+	 */
+	private KnowledgeBase buildKnowledgeBase(KnowledgeBaseConfiguration configurationKnowledgeBaseConfiguration) {
+		return null;
+	}
 }

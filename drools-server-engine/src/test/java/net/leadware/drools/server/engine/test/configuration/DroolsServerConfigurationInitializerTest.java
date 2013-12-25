@@ -25,11 +25,14 @@ package net.leadware.drools.server.engine.test.configuration;
  * #L%
  */
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 import net.leadware.drools.server.engine.configuration.DroolsServerConfigurationInitializer;
 import net.leadware.drools.server.model.configuration.DroolsServerConfiguration;
-import net.leadware.drools.server.model.configuration.KnowledgeSession;
-import net.leadware.drools.server.model.configuration.KnowledgeSessionType;
+import net.leadware.drools.server.model.configuration.KnowledgeSessionConfiguration;
+import net.leadware.drools.server.model.configuration.KnowledgeSessionTypeConfiguration;
 
 import org.apache.log4j.Logger;
 import org.junit.After;
@@ -198,14 +201,14 @@ public class DroolsServerConfigurationInitializerTest {
 		assertEquals(2, serverConfiguration.getKnowledgeSession().size());
 		
 		// Obtention des deux sessions
-		KnowledgeSession session1 = serverConfiguration.getKnowledgeSession().get(0);
-		KnowledgeSession session2 = serverConfiguration.getKnowledgeSession().get(1);
+		KnowledgeSessionConfiguration session1 = serverConfiguration.getKnowledgeSession().get(0);
+		KnowledgeSessionConfiguration session2 = serverConfiguration.getKnowledgeSession().get(1);
 		
 		// Verifications
 		assertEquals("ksession-test-01", session1.getName());
 		assertEquals("ksession-test-02", session2.getName());
-		assertEquals(KnowledgeSessionType.STATELESS, session1.getType());
-		assertEquals(KnowledgeSessionType.STATEFUL, session2.getType());
+		assertEquals(KnowledgeSessionTypeConfiguration.STATELESS, session1.getType());
+		assertEquals(KnowledgeSessionTypeConfiguration.STATEFUL, session2.getType());
 		assertNull(session1.getKnowledgeAgent());
 		assertNotNull(session1.getKnowledgeBase());
 		assertNotNull(session2.getKnowledgeAgent());
