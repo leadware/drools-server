@@ -72,6 +72,7 @@
 							<packageName>net.leadware.drools.server.model.configuration</packageName>
 							<schemaDirectory>${basedir}/src/main/resources/xsd</schemaDirectory>
 							<schemaFiles>drools-server-configuration.xsd</schemaFiles>
+							<npa>true</npa>
 						</configuration>
 					</execution>
 				</executions>
