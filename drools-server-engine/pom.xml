@@ -62,6 +62,14 @@
 			<artifactId>drools-server-tools</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+	
+		<!-- Log4j dependency -->
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>${log4j.version}</version>
+			<scope>provided</scope>
+		</dependency>
 		
 		<!-- JUnit Depenndy -->
 		<dependency>

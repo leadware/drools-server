@@ -29,6 +29,7 @@ import java.io.InputStream;
 
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
@@ -36,13 +37,15 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
 import net.leadware.drools.server.model.configuration.DroolsServerConfiguration;
-import net.leadware.drools.server.tools.ENVHelper;
+import net.leadware.drools.server.tools.env.ENVHelper;
+import net.leadware.drools.server.tools.jaxb.DroolsServerConfigurationJaxbValidationEventHandler;
 
 /**
  * Classe representant l'initialiseur de configuration du serveur
  * @author <a href="mailto:jetune@leadware.net">Jean-Jacques ETUNE NGI</a>
  * @since 24 déc. 2013 - 14:26:34
  */
+@SuppressWarnings("unchecked")
 public class DroolsServerConfigurationInitializer {
 	
 	/**
@@ -64,6 +67,11 @@ public class DroolsServerConfigurationInitializer {
 	 * Etat de validation de configuration
 	 */
 	private boolean validateConfiguration = true;
+	
+	/**
+	 * Gestionnaire des evenements de validation
+	 */
+	private DroolsServerConfigurationJaxbValidationEventHandler handler;
 	
 	/**
 	 * Constructeur par defaut
@@ -194,6 +202,20 @@ public class DroolsServerConfigurationInitializer {
 			
 			// Positionnement du schema
 			unmarshaller.setSchema(loadConfigurationSchema());
+			
+			try {
+				
+				// Instanciation du gestionnaire d'evenements de validation
+				handler = new DroolsServerConfigurationJaxbValidationEventHandler();
+				
+				// Positionnement du gestionnaire d'erreur de validation
+				unmarshaller.setEventHandler(handler);
+				
+			} catch (JAXBException e) {
+				
+				// On relance
+				throw new RuntimeException("Erreur lors du positionnement du gestionnaire des evenements de validation", e);
+			}
 		}
 		
 		// Si le fichier est charge depuis le classpath
@@ -224,13 +246,16 @@ public class DroolsServerConfigurationInitializer {
 		
 		try {
 			
+			// Unmarshalling
+			JAXBElement<DroolsServerConfiguration> serverConfigurationElements = (JAXBElement<DroolsServerConfiguration>) unmarshaller.unmarshal(configurationStream);
+			
 			// On deserialise
-			return (DroolsServerConfiguration) unmarshaller.unmarshal(configurationStream);
+			return serverConfigurationElements.getValue();
 			
 		} catch (JAXBException e) {
 			
 			// On relance
-			throw new RuntimeException("Erreur lors de la deserialisation du ficher de configuration du serveur : " + configurationPath);
+			throw new RuntimeException("Erreur survenue lors de la validation du fichier de configuration du serveur Drools [ligne: " + handler.getLine() + ", colonne: " + handler.getColumn() + ", Erreur: " + handler.getMessage() + "]", handler.getLinkedException());
 		}
 	}
 	
@@ -262,5 +287,24 @@ public class DroolsServerConfigurationInitializer {
 			// On relance
 			throw new RuntimeException("Erreur lors du chargement du schema de validation du ficcher de configuration du serveur: [classpath:" + SCHEMA_LOCATION + "]", e);
 		}
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		
+		// Buffer
+		StringBuilder builder = new StringBuilder();
+		
+		// Construction de la chaine
+		builder.append("Configuration Path : " + this.configurationPath + " --- ")
+			   .append("Find In Class Path : " + this.inClasspath + " --- ")
+			   .append("Validate Configuration : " + this.validateConfiguration);
+		
+		// On retourne la chaine
+		return builder.toString();
 	}
 }

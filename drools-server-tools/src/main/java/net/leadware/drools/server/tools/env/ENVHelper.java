@@ -1,7 +1,7 @@
 /**
  * 
  */
-package net.leadware.drools.server.tools;
+package net.leadware.drools.server.tools.env;
 
 /*
  * #%L
