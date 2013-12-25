@@ -172,6 +172,9 @@ public class DroolsServerConfigurationInitializer {
 		// Stream sur le fichier de configuration
 		InputStream configurationStream = null;
 		
+		// Configuration Server Drools
+		DroolsServerConfiguration serverConfiguration = null;
+		
 		try {
 			
 			// Contexte JAXB
@@ -249,14 +252,17 @@ public class DroolsServerConfigurationInitializer {
 			// Unmarshalling
 			JAXBElement<DroolsServerConfiguration> serverConfigurationElements = (JAXBElement<DroolsServerConfiguration>) unmarshaller.unmarshal(configurationStream);
 			
-			// On deserialise
-			return serverConfigurationElements.getValue();
+			// Obtention de la configuration
+			serverConfiguration = serverConfigurationElements.getValue();
 			
 		} catch (JAXBException e) {
 			
 			// On relance
 			throw new RuntimeException("Erreur survenue lors de la validation du fichier de configuration du serveur Drools [ligne: " + handler.getLine() + ", colonne: " + handler.getColumn() + ", Erreur: " + handler.getMessage() + "]", handler.getLinkedException());
 		}
+		
+		// On retourne la configuration
+		return serverConfiguration;
 	}
 	
 	/**

@@ -62,13 +62,61 @@
 			<artifactId>drools-server-tools</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-	
+		
 		<!-- Log4j dependency -->
 		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
 			<version>${log4j.version}</version>
 			<scope>provided</scope>
+		</dependency>
+			
+		<!-- Drools Core Dependency -->
+		<dependency>
+			<groupId>org.drools</groupId>
+			<artifactId>drools-core</artifactId>
+		</dependency>
+	
+		<!-- Drools Compiler Dependency -->
+		<dependency>
+			<groupId>org.drools</groupId>
+			<artifactId>drools-compiler</artifactId>
+		</dependency>
+		
+		<!-- MVel 2 Dependency -->
+		<dependency>
+			<groupId>org.mvel</groupId>
+			<artifactId>mvel2</artifactId>
+		</dependency>
+		
+		<!-- SLF4J api Dependency -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
+	
+		<!-- Org AntLR Runtime Dependendy -->
+		<dependency>
+			<groupId>org.antlr</groupId>
+			<artifactId>antlr-runtime</artifactId>
+		</dependency>
+		
+		<!-- Org AntLR Dependendy -->
+		<dependency>
+			<groupId>org.antlr</groupId>
+			<artifactId>antlr</artifactId>
+		</dependency>
+		
+		<!-- Stringtemplate Dependendy -->
+		<dependency>
+			<groupId>org.antlr</groupId>
+			<artifactId>stringtemplate</artifactId>
+		</dependency>
+		
+		<!-- AntLR Dependendy -->
+		<dependency>
+			<groupId>antlr</groupId>
+			<artifactId>antlr</artifactId>
 		</dependency>
 		
 		<!-- JUnit Depenndy -->
@@ -78,5 +126,15 @@
 		</dependency>
 		
 	</dependencies>
+	
+	<!-- Project Build Configuration -->
+	<build>
+		
+		<!-- Project Build Plugins -->
+		<plugins>
+			
+		</plugins>
+		
+	</build>
 	
 </project>
