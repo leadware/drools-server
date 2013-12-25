@@ -101,6 +101,10 @@
 			<selector xpath="tns:knowledge-session" />
 			<field xpath="@name" />
 		</unique>
+		<unique name="uniqueAgentName">
+			<selector xpath="tns:knowledge-session/tns:knowledge-agent" />
+			<field xpath="@name" />
+		</unique>
 	</element>
 	
 </schema>
