@@ -35,32 +35,34 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for KnowledgeSessionTypeConfiguration.
+ * <p>Java class for ResultSeverityConfiguration.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * <p>
  * <pre>
- * &lt;simpleType name="KnowledgeSessionTypeConfiguration">
+ * &lt;simpleType name="ResultSeverityConfiguration">
  *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string">
- *     &lt;enumeration value="STATELESS"/>
- *     &lt;enumeration value="STATEFUL"/>
+ *     &lt;enumeration value="ERROR"/>
+ *     &lt;enumeration value="INFO"/>
+ *     &lt;enumeration value="WARN"/>
  *   &lt;/restriction>
  * &lt;/simpleType>
  * </pre>
  * 
  */
-@XmlType(name = "KnowledgeSessionTypeConfiguration", namespace = "http://www.leadware.net/drools-server-configuration")
+@XmlType(name = "ResultSeverityConfiguration", namespace = "http://www.leadware.net/drools-server-configuration")
 @XmlEnum
-public enum KnowledgeSessionTypeConfiguration {
+public enum ResultSeverityConfiguration {
 
-    STATELESS,
-    STATEFUL;
+    ERROR,
+    INFO,
+    WARN;
 
     public String value() {
         return name();
     }
 
-    public static KnowledgeSessionTypeConfiguration fromValue(String v) {
+    public static ResultSeverityConfiguration fromValue(String v) {
         return valueOf(v);
     }
 

@@ -30,8 +30,10 @@
   	</knowledge-session>
   	<knowledge-session name="ksession-test-02" type="STATEFUL">
 	  	<knowledge-agent name="agent-test-02" newInstance="false" scanPeriod="60">
-	  		<resource path="resource-path-02.drl" type="DRL" inClassPath="false"/>
-	    	<resource path="resource-path-02.xml" type="CHANGE_SET" inClassPath="false"/>
+	  		<knowledge-base>
+	  			<resource path="resource-path-02.drl" type="DRL" inClassPath="false"/>
+	    		<resource path="resource-path-02.xml" type="CHANGE_SET" inClassPath="false"/>
+	  		</knowledge-base>
 	  	</knowledge-agent>
   	</knowledge-session>
 </drools-server>

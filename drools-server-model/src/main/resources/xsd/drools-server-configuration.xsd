@@ -44,6 +44,15 @@
 		</restriction>
 	</simpleType>
 	
+	<!-- Severite des resultats -->
+	<simpleType name="ResultSeverityConfiguration">
+		<restriction base="string">
+			<enumeration value="ERROR" />
+			<enumeration value="INFO" />
+			<enumeration value="WARN" />
+		</restriction>
+	</simpleType>
+	
 	<!-- Type de session intelligente -->
 	<simpleType name="KnowledgeSessionTypeConfiguration">
 		<restriction base="string">
@@ -62,19 +71,24 @@
 	<!-- Base de connaissance -->
 	<complexType name="KnowledgeBaseConfiguration">
 		<sequence>
-			<element name="resource" type="tns:ResourceConfiguration" minOccurs="0" maxOccurs="unbounded" />
+			<element name="resource" type="tns:ResourceConfiguration" minOccurs="1" maxOccurs="unbounded" />
 		</sequence>
+		<attribute name="onDuplicateRule" type="tns:ResultSeverityConfiguration" use="optional" default="INFO" />
+		<attribute name="onDuplicateFunction" type="tns:ResultSeverityConfiguration" use="optional" default="INFO" />
+		<attribute name="multiThreadEvaluation" type="boolean" use="optional" default="false" />
+		<attribute name="maxEvaluationThreads" type="int" use="optional" default="3" />
 	</complexType>
 	
 	<!-- Agent intelligent -->
 	<complexType name="KnowledgeAgentConfiguration">
 		<sequence>
-			<element name="resource" type="tns:ResourceConfiguration" minOccurs="0" maxOccurs="unbounded" />
+			<element name="knowledge-base" type="tns:KnowledgeBaseConfiguration" minOccurs="1" maxOccurs="1" />
 		</sequence>
 		<attribute name="name" type="string" use="required" />
 		<attribute name="newInstance" type="boolean" fixed="false" />
 		<attribute name="scanDirectories" type="boolean" use="optional" default="true" />
-		<attribute name="scanPeriod" type="nonNegativeInteger" use="optional" default="60" />
+		<attribute name="scanResources" type="boolean" use="optional" default="true" />
+		<attribute name="scanPeriod" type="unsignedShort" use="optional" default="60" />
 	</complexType>
 	
 	<!-- Session intelligente -->

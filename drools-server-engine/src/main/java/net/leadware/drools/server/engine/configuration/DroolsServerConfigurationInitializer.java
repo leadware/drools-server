@@ -93,7 +93,7 @@ public class DroolsServerConfigurationInitializer {
 		// Si le chemin est null
 		if(this.configurationPath == null) this.configurationPath = "META-INF/drools-server-configuration.xml";
 	}
-
+	
 	/**
 	 * Methode d'obtention du champ "configurationPath"
 	 * @return champ "configurationPath"
@@ -103,7 +103,7 @@ public class DroolsServerConfigurationInitializer {
 		// Renvoi de la valeur du champ
 		return configurationPath;
 	}
-
+	
 	/**
 	 * Methode de modification du champ "configurationPath"
 	 * @param configurationPath champ configurationPath a modifier
