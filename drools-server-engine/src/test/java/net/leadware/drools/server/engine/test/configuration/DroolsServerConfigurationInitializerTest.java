@@ -84,7 +84,7 @@ public class DroolsServerConfigurationInitializerTest {
 		
 		// Positionnement de l'état de validation
 		initializer.setValidateConfiguration(true);
-
+		
 		// Un log
 		log.info(initializer);
 		

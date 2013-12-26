@@ -1,0 +1,16 @@
+package  drools;
+
+import net.leadware.drools.server.engine.test.engine.Agent;
+import net.leadware.drools.server.engine.test.engine.ValidationResult;    
+
+global ValidationResult result;
+
+rule "validation_matricule_test_01" 
+dialect "java"
+when
+    Agent(matricule == null || == "")
+then
+    
+    // On positionne le resultat
+    result.setText("Le matricule de l'objet est vide");
+end

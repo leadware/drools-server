@@ -104,7 +104,7 @@
 	<!-- Drools server configuration -->
 	<complexType name="DroolsServerConfiguration">
 		<sequence>
-			<element name="knowledge-session" type="tns:KnowledgeSessionConfiguration" minOccurs="0" maxOccurs="unbounded" />
+			<element name="knowledge-session" type="tns:KnowledgeSessionConfiguration" minOccurs="1" maxOccurs="unbounded" />
 		</sequence>
 	</complexType>
 	

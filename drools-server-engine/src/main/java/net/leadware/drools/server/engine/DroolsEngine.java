@@ -68,14 +68,9 @@ public class DroolsEngine {
 	private DroolsServerConfigurationInitializer serverConfigurationInitializer = new DroolsServerConfigurationInitializer();
 	
 	/**
-	 * Map des sessions avec etat
+	 * Map des sessions
 	 */
-	private Map<String, StatefulKnowledgeSession> statefulSessions = new HashMap<String, StatefulKnowledgeSession>();
-	
-	/**
-	 * Map des sessions stateless
-	 */
-	private Map<String, StatelessKnowledgeSession> statelessSessions = new HashMap<String, StatelessKnowledgeSession>();
+	private Map<String, Object> knowledgeSessions = new HashMap<String, Object>();
 	
 	/**
 	 * Etat de demarrage des services de moditoring des changement d'etat des ressources
@@ -179,8 +174,7 @@ public class DroolsEngine {
 		// On retourne la base de connaissances
 		return knowledgeBase;
 	}
-	
-	
+		
 	/**
 	 * Methode permettant de construire une base de connaissance a partir de l'agent intelligent configuree
 	 * @param knowledgeAgentConfiguration	Configuration de l'agent intelligent
@@ -412,7 +406,7 @@ public class DroolsEngine {
 				StatelessKnowledgeSession statelessKnowledgeSession = buildStatelessKnowledgeSession(knowledgeSessionConfiguration);
 				
 				// Ajout de la session dans la MAP
-				statelessSessions.put(knowledgeSessionConfiguration.getName(), statelessKnowledgeSession);
+				knowledgeSessions.put(knowledgeSessionConfiguration.getName(), statelessKnowledgeSession);
 				
 			} else {
 				
@@ -420,7 +414,7 @@ public class DroolsEngine {
 				StatefulKnowledgeSession statefulKnowledgeSession = buildStatefulKnowledgeSession(knowledgeSessionConfiguration);
 				
 				// Ajout de la session dans la MAP
-				statefulSessions.put(knowledgeSessionConfiguration.getName(), statefulKnowledgeSession);
+				knowledgeSessions.put(knowledgeSessionConfiguration.getName(), statefulKnowledgeSession);
 			}
 			
 		}
@@ -467,16 +461,23 @@ public class DroolsEngine {
 			}
 		}
 		
-		// Parcours de la Map des sessions Stateful
-		for (StatefulKnowledgeSession statefulKnowledgeSession : statefulSessions.values()) {
+		// Parcours de la Map des sessions
+		for (String sessionName : knowledgeSessions.keySet()) {
 			
 			try {
 				
-				// Arret des travaux
-				statefulKnowledgeSession.halt();
-				
-				// tentative de liberation des ressources
-				statefulKnowledgeSession.dispose();
+				// Si c'est une session Statefull
+				if(isStatefulSession(sessionName)) {
+					
+					// Cast
+					StatefulKnowledgeSession statefulKnowledgeSession = (StatefulKnowledgeSession) knowledgeSessions.get(sessionName);
+
+					// Arret des travaux
+					statefulKnowledgeSession.halt();
+					
+					// tentative de liberation des ressources
+					statefulKnowledgeSession.dispose();
+				}
 				
 			} catch (Exception e) {
 				
@@ -485,8 +486,57 @@ public class DroolsEngine {
 			}
 		}
 		
-		// On vide les maps
-		statelessSessions.clear();
-		statefulSessions.clear();
+		// On vide la map
+		knowledgeSessions.clear();
+	}
+	
+	/**
+	 * Methode permettant de tester si une session existe
+	 * @param sessionName	Nom de la session
+	 * @return	Etat d'existence de la session
+	 */
+	public boolean isSessionExists(String sessionName) {
+		
+		// on retourne l'etat d'existence
+		return (knowledgeSessions.get(sessionName.trim()) != null);
+	}
+	
+	/**
+	 * Methode permettant de verifier qu'une session est de type Stateless
+	 * @param sessionName	Nom de la session
+	 * @return	Etat stateless de la session
+	 */
+	public boolean isStatelessSession(String sessionName) {
+		
+		// Objet session
+		Object knowledgeSession = knowledgeSessions.get(sessionName.trim());
+		
+		// On retourne l'etat
+		return (knowledgeSession != null) && (knowledgeSession instanceof StatelessKnowledgeSession);
+	}
+	
+	/**
+	 * Methode permettant de verifier qu'une session est de type Stateful
+	 * @param sessionName	Nom de la session
+	 * @return	Etat stateful de la session
+	 */
+	public boolean isStatefulSession(String sessionName) {
+		
+		// Objet session
+		Object knowledgeSession = knowledgeSessions.get(sessionName.trim());
+		
+		// On retourne l'etat
+		return (knowledgeSession != null) && (knowledgeSession instanceof StatefulKnowledgeSession);
+	}
+	
+	/**
+	 * Methode permettant d'obtenir un session intelligente
+	 * @param sessionName	Nom de la session
+	 * @return	Session intelligente
+	 */
+	public Object getKnowledgeSession(String sessionName) {
+		
+		// On retourne la session
+		return knowledgeSessions.get(sessionName.trim());
 	}
 }
