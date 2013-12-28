@@ -153,9 +153,35 @@ public class DroolsServerConfigurationInitializerTest {
 			// Trace
 			log.error(e.getMessage());
 		}
-
+		
 		// Positionnement du chemin
 		initializer.setConfigurationPath("configurations/drools-server-configuration-test-04.xml");
+		
+		// Positionnement de l'etat de recherche dans le classpath
+		initializer.setInClasspath(true);
+		
+		// Positionnement de l'état de validation
+		initializer.setValidateConfiguration(true);
+
+		// Un log
+		log.info(initializer);
+		
+		try {
+			
+			// Tentative d'initialisation
+			initializer.initConfiguration();
+			
+			// Erreur
+			fail("Echec du test : L'initialisation devrait produire une exception");
+			
+		} catch (Exception e) {
+			
+			// Trace
+			log.error(e.getMessage());
+		}
+
+		// Positionnement du chemin
+		initializer.setConfigurationPath("configurations/drools-server-configuration-test-not-exists.xml");
 		
 		// Positionnement de l'etat de recherche dans le classpath
 		initializer.setInClasspath(true);

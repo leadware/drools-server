@@ -2,13 +2,15 @@ package  drools;
 
 import net.leadware.drools.server.engine.test.engine.Agent;
 import net.leadware.drools.server.engine.test.engine.ValidationResult;    
+import java.util.List;
 
 global ValidationResult result;
+global List<Agent> agents;
 
-rule "validation_matricule_test_01" 
+rule "printrule_test_01" 
 dialect "java"
 when
-    Agent($matricule : matricule == null || == "")
+    Agent($matricule : matricule);
 then
     
     // On positionne le resultat

@@ -25,15 +25,23 @@ package net.leadware.drools.server.engine.test.engine;
  * #L%
  */
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 import net.leadware.drools.server.engine.DroolsEngine;
 
 import org.apache.log4j.Logger;
+import org.drools.command.runtime.BatchExecutionCommandImpl;
+import org.drools.command.runtime.SetGlobalCommand;
+import org.drools.command.runtime.rule.FireAllRulesCommand;
+import org.drools.command.runtime.rule.InsertObjectCommand;
 import org.drools.runtime.StatelessKnowledgeSession;
 import org.junit.After;
 import org.junit.Before;
@@ -45,6 +53,11 @@ import org.junit.Test;
  * @since 26 déc. 2013 - 13:17:58
  */
 public class DroolsEngineTest {
+
+	/**
+	 *  Taille totale de la liste des agents
+	 */
+	private long size = 2000000;
 	
 	/**
 	 * Logger de la classe
@@ -76,7 +89,7 @@ public class DroolsEngineTest {
 	 * Test method for {@link net.leadware.drools.server.engine.DroolsEngine#start()}.
 	 * @throws ParseException Exception potentielle
 	 */
-	@Test
+	//@Test
 	public void testStart() throws ParseException {
 		
 		// Moteur Drools
@@ -106,7 +119,7 @@ public class DroolsEngineTest {
 		
 		// Obtention de la session
 		StatelessKnowledgeSession knowledgeSession = (StatelessKnowledgeSession) droolsEngine.getKnowledgeSession(sessionName);
-
+		
 		// Agent a valider
 		Agent agent = new Agent("", "YASHIRO", "NANAKAZE", dateformat.parse("28/03/1981"), "DG");
 		
@@ -126,11 +139,248 @@ public class DroolsEngineTest {
 		// Arret du moteur
 		droolsEngine.stop();
 	}
+	
+	//@Test
+	public void testMasseExecutionPas() throws ParseException, InterruptedException {
+		
+		// Moteur Drools
+		DroolsEngine droolsEngine = new DroolsEngine();
+		
+		// Positionnement du fichier de configuration
+		droolsEngine.setConfigurationPath("configurations/drools-server-configuration-test-07.xml");
 
+		// Positionnement de l'etat de recherche dans le classpath
+		droolsEngine.setInClasspath(true);
+		
+		// Positionnement de l'état de validation
+		droolsEngine.setValidateConfiguration(true);
+		
+		// Un log
+		log.info("Demarrage du moteur");
+		
+		// Demarrage du moteur
+		droolsEngine.start();
+		
+		// Nom de la session
+		String sessionName = "ksession-test-01";
+		
+		// Obtention de la session
+		final StatelessKnowledgeSession knowledgeSession = (StatelessKnowledgeSession) droolsEngine.getKnowledgeSession(sessionName);
+		
+		// Variable globale
+		ValidationResult validationResult = new ValidationResult();
+		
+		// Positionnement de la variable globale
+		knowledgeSession.setGlobal("result", validationResult);
+		
+		// Liste totale des agents a process
+		final List<Agent> agents = new ArrayList<Agent>();
+		
+		// Pas de decoupage
+		int pas = 6000;
+		
+		// Un log
+		log.info("Construction de la liste globale");
+		
+		// Parcours pour initialisation de la liste globale
+		for(long i = 0; i <= size; i++) {
+			
+			// Ajout de l'agent i
+			agents.add(new Agent("MAT" + i, "Nom" + i, "Prenom" + i, dateformat.parse("28/03/1981"), "GRADE" + i));
+		}
+		
+		// Date/Heure de demarrage de l'execution
+		long startProcess = System.currentTimeMillis();
+		
+		// Un log
+		log.info("Execution de la liste de taille : " + size + ", en pas de : " + pas);
+		
+		// Parcours d'execution pas a pas
+		for(int i = 0; i <= size - pas + 1; i+=pas) {
+			
+			// Execution
+			knowledgeSession.execute(agents.subList(i, i+pas-1));
+		}
+
+		// Date/Heure de demarrage de l'execution
+		long endProcess = System.currentTimeMillis();
+		
+		// Log
+		log.info("Taille de la liste de faits					:	" + size);
+		log.info("Quantite des donnees inseree dans la session	:	" + pas);
+		log.info("Durée d'execution des regles					:	" + (endProcess - startProcess)/(1000) + " Secondes");
+		
+		// Arret du moteur
+		droolsEngine.stop();
+	}
+	
+	//@Test
+	public void testMasseExecutionPasUnitaire() throws ParseException, InterruptedException {
+		
+		// Moteur Drools
+		DroolsEngine droolsEngine = new DroolsEngine();
+		
+		// Positionnement du fichier de configuration
+		droolsEngine.setConfigurationPath("configurations/drools-server-configuration-test-07.xml");
+
+		// Positionnement de l'etat de recherche dans le classpath
+		droolsEngine.setInClasspath(true);
+		
+		// Positionnement de l'état de validation
+		droolsEngine.setValidateConfiguration(true);
+		
+		// Un log
+		log.info("Demarrage du moteur");
+		
+		// Demarrage du moteur
+		droolsEngine.start();
+		
+		// Nom de la session
+		String sessionName = "ksession-test-01";
+		
+		// Obtention de la session
+		final StatelessKnowledgeSession knowledgeSession = (StatelessKnowledgeSession) droolsEngine.getKnowledgeSession(sessionName);
+		
+		// Variable globale
+		ValidationResult validationResult = new ValidationResult();
+		
+		// Positionnement de la variable globale
+		knowledgeSession.setGlobal("result", validationResult);
+		
+		// Liste totale des agents a process
+		final List<Agent> agents = new ArrayList<Agent>();
+		
+		// Pas de decoupage
+		int pas = 1;
+		
+		// Un log
+		log.info("Construction de la liste globale");
+		
+		// Parcours pour initialisation de la liste globale
+		for(long i = 0; i <= size; i++) {
+			
+			// Ajout de l'agent i
+			agents.add(new Agent("MAT" + i, "Nom" + i, "Prenom" + i, dateformat.parse("28/03/1981"), "GRADE" + i));
+		}
+		
+		// Date/Heure de demarrage de l'execution
+		long startProcess = System.currentTimeMillis();
+		
+		// Un log
+		log.info("Execution de la liste de taille : " + size + ", en pas de : " + pas);
+		
+		// Parcours d'execution pas a pas
+		for(int i = 0; i <= size - pas + 1; i+=pas) {
+			
+			// Execution
+			knowledgeSession.execute(agents.subList(i, i+pas-1));
+		}
+
+		// Date/Heure de demarrage de l'execution
+		long endProcess = System.currentTimeMillis();
+		
+		// Log
+		log.info("Taille de la liste de faits					:	" + size);
+		log.info("Quantite des donnees inseree dans la session	:	" + pas);
+		log.info("Durée d'execution des regles					: 	" + (endProcess - startProcess)/(1000) + " Secondes");
+		
+		// Arret du moteur
+		droolsEngine.stop();
+	}
+	
 	/**
-	 * Test method for {@link net.leadware.drools.server.engine.DroolsEngine#stop()}.
+	 * Test method for {@link net.leadware.drools.server.engine.DroolsEngine#execute()}.
+	 * @throws ParseException 
 	 */
 	@Test
-	public void testStop() {}
+	public void testExecute() throws ParseException {
+		
+		// Moteur Drools
+		DroolsEngine droolsEngine = new DroolsEngine();
+		
+		// Positionnement du fichier de configuration
+		droolsEngine.setConfigurationPath("configurations/drools-server-configuration-test-07.xml");
+
+		// Positionnement de l'etat de recherche dans le classpath
+		droolsEngine.setInClasspath(true);
+		
+		// Positionnement de l'état de validation
+		droolsEngine.setValidateConfiguration(true);
+		
+		// Un log
+		log.info("Demarrage du moteur");
+		
+		// Demarrage du moteur
+		droolsEngine.start();
+		
+		// Nom de la session
+		String sessionName = "ksession-test-01";
+		
+		// Variable globale
+		ValidationResult validationResult = new ValidationResult();
+		
+		SetGlobalCommand setGlobalCommand = new SetGlobalCommand();
+		setGlobalCommand.setIdentifier("result");
+		setGlobalCommand.setOutIdentifier("result");
+		setGlobalCommand.setObject(validationResult);
+		
+		// Liste totale des agents a process
+		final List<Agent> agents = new ArrayList<Agent>();
+		
+		// Pas de decoupage
+		int pas = 100000;
+		
+		// Un log
+		log.info("Construction de la liste globale");
+		
+		// Parcours pour initialisation de la liste globale
+		for(long i = 0; i <= size; i++) {
+			
+			// Ajout de l'agent i
+			agents.add(new Agent("MAT" + i, "Nom" + i, "Prenom" + i, dateformat.parse("28/03/1981"), "GRADE" + i));
+		}
+		
+		// Date/Heure de demarrage de l'execution
+		long startProcess = System.currentTimeMillis();
+		
+		// Un log
+		log.info("Execution de la liste de taille : " + size + ", en pas de : " + pas);
+		
+		// Parcours d'execution pas a pas
+		for(int i = 0; i <= size - pas + 1; i+=pas) {
+			
+			// Sous-liste
+			List<Agent> subList = agents.subList(i, i+pas-1);
+
+			// Batch executor
+			BatchExecutionCommandImpl batch = new BatchExecutionCommandImpl();
+			batch.setLookup(sessionName);
+			
+			// Ajout
+			batch.getCommands().add(setGlobalCommand);
+			
+			for(int j = 0; j < subList.size(); j++) batch.getCommands().add(new InsertObjectCommand(subList.get(j)));
+
+			// FireAllRule
+			FireAllRulesCommand fireall = new FireAllRulesCommand();
+			
+			// Ajout du fireall
+			batch.getCommands().add(fireall);
+
+			// Execution
+			droolsEngine.execute(batch);
+		}
+		
+		// Date/Heure de demarrage de l'execution
+		long endProcess = System.currentTimeMillis();
+		
+		// Log
+		log.info("Taille de la liste de faits					:	" + size);
+		log.info("Quantite des donnees inseree dans la session	:	" + pas);
+		log.info("Durée d'execution des regles					:	" + (endProcess - startProcess)/(1000) + " Secondes");
+		
+		// Arret du moteur
+		droolsEngine.stop();
+	}
 
 }

@@ -40,6 +40,7 @@ import net.leadware.drools.server.model.configuration.ResourceTypeConfiguration;
 
 import org.drools.KnowledgeBase;
 import org.drools.KnowledgeBaseFactory;
+import org.drools.RuntimeDroolsException;
 import org.drools.agent.KnowledgeAgent;
 import org.drools.agent.KnowledgeAgentFactory;
 import org.drools.builder.KnowledgeBuilder;
@@ -48,9 +49,15 @@ import org.drools.builder.KnowledgeBuilderFactory;
 import org.drools.builder.ResourceType;
 import org.drools.builder.ResultSeverity;
 import org.drools.builder.conf.KBuilderSeverityOption;
+import org.drools.command.CommandFactory;
+import org.drools.command.impl.GenericCommand;
+import org.drools.command.runtime.BatchExecutionCommandImpl;
 import org.drools.conf.MaxThreadsOption;
 import org.drools.conf.MultithreadEvaluationOption;
+import org.drools.event.rule.DebugAgendaEventListener;
+import org.drools.event.rule.DebugWorkingMemoryEventListener;
 import org.drools.io.ResourceFactory;
+import org.drools.runtime.ExecutionResults;
 import org.drools.runtime.StatefulKnowledgeSession;
 import org.drools.runtime.StatelessKnowledgeSession;
 
@@ -238,6 +245,16 @@ public class DroolsEngine {
 		// Construction de la session sans etat
 		StatelessKnowledgeSession statelessKnowledgeSession = knowledgeBase.newStatelessKnowledgeSession();
 		
+		// Si la session est a debogguer
+		if(knowledgeSessionConfiguration.isDebug()) {
+
+			// Ajout du listener de debug des evenements sur la memoire de travail
+			statelessKnowledgeSession.addEventListener(new DebugWorkingMemoryEventListener(System.out));
+			
+			// Ajout du listener de debug des evenements sur l'agenda
+			statelessKnowledgeSession.addEventListener(new DebugAgendaEventListener(System.out));
+		}
+		
 		// On retourne la session sans etat
 		return statelessKnowledgeSession;
 	}
@@ -266,6 +283,16 @@ public class DroolsEngine {
 		
 		// Construction de la session avec etat
 		StatefulKnowledgeSession statefulKnowledgeSession = knowledgeBase.newStatefulKnowledgeSession();
+
+		// Si la session est a debogguer
+		if(knowledgeSessionConfiguration.isDebug()) {
+
+			// Ajout du listener de debug des evenements sur la memoire de travail
+			statefulKnowledgeSession.addEventListener(new DebugWorkingMemoryEventListener(System.out));
+			
+			// Ajout du listener de debug des evenements sur l'agenda
+			statefulKnowledgeSession.addEventListener(new DebugAgendaEventListener(System.out));
+		}
 		
 		// On retourne la session avec etat
 		return statefulKnowledgeSession;
@@ -498,7 +525,7 @@ public class DroolsEngine {
 	public boolean isSessionExists(String sessionName) {
 		
 		// on retourne l'etat d'existence
-		return (knowledgeSessions.get(sessionName.trim()) != null);
+		return (sessionName != null) && (!sessionName.trim().isEmpty()) && (knowledgeSessions.get(sessionName.trim()) != null);
 	}
 	
 	/**
@@ -507,6 +534,9 @@ public class DroolsEngine {
 	 * @return	Etat stateless de la session
 	 */
 	public boolean isStatelessSession(String sessionName) {
+		
+		// Si la session n'existe pas
+		if(!isSessionExists(sessionName)) return false;
 		
 		// Objet session
 		Object knowledgeSession = knowledgeSessions.get(sessionName.trim());
@@ -521,6 +551,9 @@ public class DroolsEngine {
 	 * @return	Etat stateful de la session
 	 */
 	public boolean isStatefulSession(String sessionName) {
+
+		// Si la session n'existe pas
+		if(!isSessionExists(sessionName)) return false;
 		
 		// Objet session
 		Object knowledgeSession = knowledgeSessions.get(sessionName.trim());
@@ -536,7 +569,96 @@ public class DroolsEngine {
 	 */
 	public Object getKnowledgeSession(String sessionName) {
 		
+		// Si la session n'existe pas
+		if(!isSessionExists(sessionName)) return null;
+		
 		// On retourne la session
 		return knowledgeSessions.get(sessionName.trim());
 	}
+	
+	/**
+	 * Methode d'execution d'une liste de commandes
+	 * @param commands	Liste de commandes a executer
+	 * @return Map des resultats de l'execution de la liste de commandes
+	 */
+	public ExecutionResults execute(String sessionName, List<GenericCommand<?>> commands) {
+		
+		// Obtention de la session objet 
+		Object oSession = getKnowledgeSession(sessionName);
+		
+		// Si la session n'existe pas
+		if(oSession == null) throw new RuntimeException("net.leadware.drools.engine.execute.commands.sessionnotfound");
+		
+		// Si la liste de commandes est vide
+		if(commands == null || commands.isEmpty()) throw new RuntimeDroolsException("net.leadware.drools.engine.execute.commands.emptycommandslist");
+		
+		// Resultat de l'execution
+		ExecutionResults result = null;
+		
+		// Si on est en Stateless
+		if(isStatelessSession(sessionName)) {
+			
+			// On caste
+			StatelessKnowledgeSession knowledgeSession = (StatelessKnowledgeSession) oSession;
+			
+			// Execution
+			result = knowledgeSession.execute(CommandFactory.newBatchExecution(commands));
+			
+		} else {
+			
+			// On caste
+			StatefulKnowledgeSession knowledgeSession = (StatefulKnowledgeSession) oSession;
+			
+			// Execution
+			result = knowledgeSession.execute(CommandFactory.newBatchExecution(commands));
+		}
+		
+		// On retourne le resultat
+		return result;
+	}
+
+	/**
+	 * Methode d'execution d'une commandes batch
+	 * @param command	Commandes batch a executer
+	 * @return Map des resultats de l'execution de la liste de commandes
+	 */
+	public ExecutionResults execute(BatchExecutionCommandImpl command) {
+		
+		// Nom de la session
+		String sessionName = command.getLookup();
+		
+		// Si le lookup n'est pas present
+		if(sessionName == null || sessionName.trim().isEmpty()) throw new RuntimeException("net.leadware.drools.engine.execute.commands.nosessionspecified");
+		
+		// Obtention de la session objet 
+		Object oSession = getKnowledgeSession(sessionName);
+		
+		// Si la session n'existe pas
+		if(oSession == null) throw new RuntimeException("net.leadware.drools.engine.execute.commands.sessionnotfound");
+		
+		// Resultat de l'execution
+		ExecutionResults result = null;
+		
+		// Si on est en Stateless
+		if(isStatelessSession(sessionName)) {
+			
+			// On caste
+			StatelessKnowledgeSession knowledgeSession = (StatelessKnowledgeSession) oSession;
+			
+			// Execution
+			result = knowledgeSession.execute(command);
+			
+		} else {
+			
+			// On caste
+			StatefulKnowledgeSession knowledgeSession = (StatefulKnowledgeSession) oSession;
+			
+			// Execution
+			result = knowledgeSession.execute(command);
+		}
+		
+		// On retourne le resultat
+		return result;
+	}
+	
 }

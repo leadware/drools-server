@@ -99,6 +99,7 @@
 		</choice>
 		<attribute name="name" type="string" use="required" />
 		<attribute name="type" type="tns:KnowledgeSessionTypeConfiguration" use="optional" default="STATELESS" />
+		<attribute name="debug" type="boolean" use="optional" default="false" />
 	</complexType>
 	
 	<!-- Drools server configuration -->
