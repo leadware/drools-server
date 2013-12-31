@@ -1,0 +1,27 @@
+package  drools;
+
+import net.leadware.drools.server.engine.test.engine.Agent;
+import net.leadware.drools.server.engine.test.engine.ValidationResult;    
+import java.util.List;
+
+rule "testrule_test_01" 
+dialect "java"
+agenda-group "ag01"
+when
+    $agent : Agent($matricule : matricule);
+then
+	System.out.println("Règle testrule_test_01");
+    System.out.println("Prenom : " + $agent.getPrenom());
+    $agent.setPrenom("Prenom Modifie regle testrule_test_01");
+end
+
+
+rule "testrule_test_02" 
+dialect "java"
+agenda-group "ag02"
+when
+    $agent : Agent($matricule : matricule);
+then
+    System.out.println("Règle testrule_test_02");
+    System.out.println("Prenom : " + $agent.getPrenom());
+end

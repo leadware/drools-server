@@ -23,10 +23,8 @@
 
 
 <drools-server xmlns="http://www.leadware.net/drools-server-configuration" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.leadware.net/drools-server-configuration http://www.leadware.net/drools-server-configuration ">
-	<knowledge-session type="STATELESS">
-	    <knowledge-base>
-	    	<resource path="resource-path-01.drl" type="DRL" inClassPath="true"/>
-	    	<resource path="resource-path-02.xml" type="CHANGE_SET" inClassPath="false"/>
-	    </knowledge-base>
-	</knowledge-session>
+	<resources>
+		<resource name="ressource_01" path="drools/validation.drl" type="DRL" inClassPath="true"/>
+		<resource name="ressource_01" path="drools/validation.drl" type="DRL" inClassPath="true"/>
+	</resources>
 </drools-server>

@@ -223,22 +223,22 @@ public class DroolsServerConfigurationInitializerTest {
 		
 		// Verifications
 		assertNotNull(serverConfiguration);
-		assertNotNull(serverConfiguration.getKnowledgeSession());
-		assertEquals(2, serverConfiguration.getKnowledgeSession().size());
+		assertNotNull(serverConfiguration.getKnowledgeSessions());
+		assertEquals(2, serverConfiguration.getKnowledgeSessions().getKnowledgeSession().size());
 		
 		// Obtention des deux sessions
-		KnowledgeSessionConfiguration session1 = serverConfiguration.getKnowledgeSession().get(0);
-		KnowledgeSessionConfiguration session2 = serverConfiguration.getKnowledgeSession().get(1);
+		KnowledgeSessionConfiguration session1 = serverConfiguration.getKnowledgeSessions().getKnowledgeSession().get(0);
+		KnowledgeSessionConfiguration session2 = serverConfiguration.getKnowledgeSessions().getKnowledgeSession().get(1);
 		
 		// Verifications
 		assertEquals("ksession-test-01", session1.getName());
 		assertEquals("ksession-test-02", session2.getName());
 		assertEquals(KnowledgeSessionTypeConfiguration.STATELESS, session1.getType());
 		assertEquals(KnowledgeSessionTypeConfiguration.STATEFUL, session2.getType());
-		assertNull(session1.getKnowledgeAgent());
-		assertNotNull(session1.getKnowledgeBase());
-		assertNotNull(session2.getKnowledgeAgent());
-		assertNull(session2.getKnowledgeBase());
+		assertNull(session1.getKnowledgeAgentRef());
+		assertNotNull(session1.getKnowledgeBaseRef());
+		assertNotNull(session2.getKnowledgeAgentRef());
+		assertNull(session2.getKnowledgeBaseRef());
 	}
 
 }

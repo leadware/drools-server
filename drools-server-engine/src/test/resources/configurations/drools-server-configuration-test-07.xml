@@ -22,11 +22,17 @@
   -->
 
 <drools-server xmlns="http://www.leadware.net/drools-server-configuration" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.leadware.net/drools-server-configuration http://www.leadware.net/drools-server-configuration ">
-	<knowledge-session name="ksession-test-01" type="STATELESS" debug="true">
-		<knowledge-agent name="kagent-test-01" scanResources="true" >
-		    <knowledge-base>
-		    	<resource path="drools/printrule.drl" type="DRL" inClassPath="true"/>
-		    </knowledge-base>
-		</knowledge-agent>
-  	</knowledge-session>
+	<resources>
+		<resource name="printrule" path="drools/printrule.drl"/>
+	</resources>
+	<knowledge-bases>
+		<knowledge-base name="printrulekbase">
+			<resource-ref resource-name="printrule"/>
+		</knowledge-base>
+	</knowledge-bases>
+	<knowledge-sessions>
+		<knowledge-session name="printruleksession" type="STATELESS">
+			<knowledge-base-ref knowledge-base="printrulekbase"/>
+		</knowledge-session>
+	</knowledge-sessions>
 </drools-server>

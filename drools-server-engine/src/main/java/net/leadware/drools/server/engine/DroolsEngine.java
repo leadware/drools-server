@@ -32,11 +32,17 @@ import java.util.Map;
 import net.leadware.drools.server.engine.configuration.DroolsServerConfigurationInitializer;
 import net.leadware.drools.server.model.configuration.DroolsServerConfiguration;
 import net.leadware.drools.server.model.configuration.KnowledgeAgentConfiguration;
+import net.leadware.drools.server.model.configuration.KnowledgeAgentsConfiguration;
 import net.leadware.drools.server.model.configuration.KnowledgeBaseConfiguration;
+import net.leadware.drools.server.model.configuration.KnowledgeBaseConfigurationRef;
+import net.leadware.drools.server.model.configuration.KnowledgeBasesConfiguration;
 import net.leadware.drools.server.model.configuration.KnowledgeSessionConfiguration;
 import net.leadware.drools.server.model.configuration.KnowledgeSessionTypeConfiguration;
+import net.leadware.drools.server.model.configuration.KnowledgeSessionsConfiguration;
 import net.leadware.drools.server.model.configuration.ResourceConfiguration;
+import net.leadware.drools.server.model.configuration.ResourceConfigurationRef;
 import net.leadware.drools.server.model.configuration.ResourceTypeConfiguration;
+import net.leadware.drools.server.model.configuration.ResourcesConfiguration;
 
 import org.drools.KnowledgeBase;
 import org.drools.KnowledgeBaseFactory;
@@ -75,6 +81,21 @@ public class DroolsEngine {
 	private DroolsServerConfigurationInitializer serverConfigurationInitializer = new DroolsServerConfigurationInitializer();
 	
 	/**
+	 * MAP des ressources
+	 */
+	private Map<String, ResourceConfiguration> resourcesConfiguration = new HashMap<String, ResourceConfiguration>();
+	
+	/**
+	 * MAP Des bases de connaissances
+	 */
+	private Map<String, KnowledgeBase> knowledgeBases = new HashMap<String, KnowledgeBase>();
+	
+	/**
+	 * Map des agents intelligents par session
+	 */
+	private Map<String, KnowledgeAgent> knowledgeAgents = new HashMap<String, KnowledgeAgent>();
+
+	/**
 	 * Map des sessions
 	 */
 	private Map<String, Object> knowledgeSessions = new HashMap<String, Object>();
@@ -83,6 +104,20 @@ public class DroolsEngine {
 	 * Etat de demarrage des services de moditoring des changement d'etat des ressources
 	 */
 	private boolean startResourceChangeService = false;
+	
+	/**
+	 * Methode permettant d'initialiser la MAP des Resources par nom
+	 * @param resourcesConfiguration	Configuration des ressources
+	 */
+	private void buildResources(ResourcesConfiguration resourcesConfiguration) {
+		
+		// Parcours
+		for (ResourceConfiguration resourceConfiguration : resourcesConfiguration.getResource()) {
+			
+			// Ajout dans la MAP des configuration de ressources
+			this.resourcesConfiguration.put(resourceConfiguration.getName().trim(), resourceConfiguration);
+		}
+	}
 	
 	/**
 	 * Methode permettant de construire une base de connaissance a partir de la base de connaissance configuree
@@ -136,8 +171,15 @@ public class DroolsEngine {
 		// Constructeur de connaissances
 		KnowledgeBuilder knowledgeBuilder = KnowledgeBuilderFactory.newKnowledgeBuilder(droolsKnowledgeBuilderConfiguration);
 		
-		// Parcours de la liste des Resources de la configuration
-		for (ResourceConfiguration resourceConfiguration : knowledgeBaseConfiguration.getResource()) {
+		// Parcours de la liste des references de Resources de la configuration
+		for (ResourceConfigurationRef resourceConfigurationref : knowledgeBaseConfiguration.getResourceRef()) {
+			
+			// Obtention de la configuration de ressources
+			ResourceConfiguration resourceConfiguration = this.resourcesConfiguration.get(resourceConfigurationref.getResourceName().trim());
+			
+			// Si la ressource n'existe pas
+			if(resourceConfiguration == null) 
+				throw new RuntimeException("Erreur lors de la construction de la base de connaissance : la ressource referencee par '" + resourceConfigurationref.getResourceName() + "' n'existe pas.");
 			
 			// Si la ressource est dans le classpath
 			if(resourceConfiguration.isInClassPath()) {
@@ -181,19 +223,43 @@ public class DroolsEngine {
 		// On retourne la base de connaissances
 		return knowledgeBase;
 	}
-		
+	
 	/**
-	 * Methode permettant de construire une base de connaissance a partir de l'agent intelligent configuree
-	 * @param knowledgeAgentConfiguration	Configuration de l'agent intelligent
-	 * @return	Base de connaissance Drools
+	 * Methode permettant de construire la liste des bases de connaissance a partir de la base de connaissance configuree
+	 * @param knowledgeBasesConfiguration	Configuration de la liste des bases de connaissance	
 	 */
-	private KnowledgeBase buildKnowledgeBase(KnowledgeAgentConfiguration knowledgeAgentConfiguration) {
+	private void buildKnowledgeBases(KnowledgeBasesConfiguration knowledgeBasesConfiguration) {
 		
-		// Obtention de la configuration de base de connaissance
-		KnowledgeBaseConfiguration knowledgeBaseConfiguration = knowledgeAgentConfiguration.getKnowledgeBase();
+		// Parcours de la liste des configuration des bases de connaissances
+		for (KnowledgeBaseConfiguration knowledgeBaseConfiguration : knowledgeBasesConfiguration.getKnowledgeBase()) {
+			
+			// Obtention de la base de connaissance
+			KnowledgeBase knowledgeBase = buildKnowledgeBase(knowledgeBaseConfiguration);
+			
+			// Ajout de la base de connaissance dans la MAP des bases de connaissance
+			knowledgeBases.put(knowledgeBaseConfiguration.getName().trim(), knowledgeBase);
+		}
+	}
+	
+	/**
+	 * Methode permettant de construire un agent intelligent configuree
+	 * @param knowledgeAgentConfiguration	Configuration de l'agent intelligent
+	 * @return	Agent intelligent Drools
+	 */
+	private KnowledgeAgent buildKnowledgeAgent(KnowledgeAgentConfiguration knowledgeAgentConfiguration) {
+
+		// Base de connaissance drools a construire
+		KnowledgeBase knowledgeBase = null;
 		
-		// Construction de la base de connaissance Drools
-		KnowledgeBase knowledgeBase = buildKnowledgeBase(knowledgeBaseConfiguration);
+		// Obtention de la reference sur la base de connaissance
+		KnowledgeBaseConfigurationRef knowledgeBaseConfigurationRef = knowledgeAgentConfiguration.getKnowledgeBaseRef();
+
+		// Recherche de la base de connaissance dans la MAP des bases de connaissances
+		knowledgeBase = this.knowledgeBases.get(knowledgeBaseConfigurationRef.getKnowledgeBase().trim());
+		
+		// Si la base de connaissance est nulle
+		if(knowledgeBase == null) 
+			throw new RuntimeException("Erreur lors de la construction de l'agent intelligent : la base de connaissance referencee par '" + knowledgeBaseConfigurationRef.getKnowledgeBase() + "' n'existe pas.");
 		
 		// Configuration de l'agent intelligent
 		org.drools.agent.KnowledgeAgentConfiguration droolsKnowledgeAgentConfiguration = KnowledgeAgentFactory.newKnowledgeAgentConfiguration();
@@ -217,7 +283,24 @@ public class DroolsEngine {
 		KnowledgeAgent knowledgeAgent = KnowledgeAgentFactory.newKnowledgeAgent(knowledgeAgentConfiguration.getName(), knowledgeBase, droolsKnowledgeAgentConfiguration);
 		
 		// On retourne la base de connaissance issue de l'agent
-		return knowledgeAgent.getKnowledgeBase();
+		return knowledgeAgent;
+	}
+	
+	/**
+	 * Methode permettant de construire la liste des agent intelligent configuree a partir de la configuration des agents
+	 * @param knowledgeAgentsConfiguration	Configuration des agents intelligent
+	 */
+	private void buildKnowledgeAgents(KnowledgeAgentsConfiguration knowledgeAgentsConfiguration) {
+		
+		// Parcours de la liste des configuration d'agents
+		for (KnowledgeAgentConfiguration knowledgeAgentConfiguration : knowledgeAgentsConfiguration.getKnowledgeAgent()) {
+			
+			// Construction de l'agent intelligent
+			KnowledgeAgent knowledgeAgent = buildKnowledgeAgent(knowledgeAgentConfiguration);
+			
+			// Ajout de l'agent dans la MAP des agents
+			this.knowledgeAgents.put(knowledgeAgentConfiguration.getName().trim(), knowledgeAgent);
+		}
 	}
 	
 	/**
@@ -230,16 +313,31 @@ public class DroolsEngine {
 		// Base de connaissance
 		KnowledgeBase knowledgeBase = null;
 		
-		// Si la base de connaissance est non nulle
-		if(knowledgeSessionConfiguration.getKnowledgeBase() != null) {
+		// Agent intelligent
+		KnowledgeAgent knowledgeAgent = null;
+		
+		// Si la reference a la base de connaissance est non nulle
+		if(knowledgeSessionConfiguration.getKnowledgeBaseRef() != null) {
 			
-			// Construction de la base de connaissance
-			knowledgeBase = buildKnowledgeBase(knowledgeSessionConfiguration.getKnowledgeBase());
+			// Obtention de la base de connaissance depuis la MAP des bases de connaissances
+			knowledgeBase = this.knowledgeBases.get(knowledgeSessionConfiguration.getKnowledgeBaseRef().getKnowledgeBase().trim());
+			
+			// Si la base de connaissance est nulle
+			if(knowledgeBase == null) 
+				throw new RuntimeException("Erreur lors de la construction de la session intelligente (stateless) : la base de connaissance referencee par '" + knowledgeSessionConfiguration.getKnowledgeBaseRef().getKnowledgeBase() + "' n'existe pas.");
 			
 		} else {
 			
+			// Obtention de l'agent intelligent depuis la MAP des aggents intelligents
+			knowledgeAgent = this.knowledgeAgents.get(knowledgeSessionConfiguration.getKnowledgeAgentRef().getKnowledgeAgent().trim());
+			
+			// Si l'agent est null
+			if(knowledgeAgent == null)
+				throw new RuntimeException("Erreur lors de la construction de la session intelligente (stateless) : l'agent intelligent referencee par '" + knowledgeSessionConfiguration.getKnowledgeAgentRef().getKnowledgeAgent() + "' n'existe pas.");
+			
 			// Construction de la base de connaissance
-			knowledgeBase = buildKnowledgeBase(knowledgeSessionConfiguration.getKnowledgeAgent());
+			knowledgeBase = knowledgeAgent.getKnowledgeBase();
+			
 		}
 		
 		// Construction de la session sans etat
@@ -269,21 +367,36 @@ public class DroolsEngine {
 		// Base de connaissance
 		KnowledgeBase knowledgeBase = null;
 		
-		// Si la base de connaissance est non nulle
-		if(knowledgeSessionConfiguration.getKnowledgeBase() != null) {
+		// Agent intelligent
+		KnowledgeAgent knowledgeAgent = null;
+		
+		// Si la reference a la base de connaissance est non nulle
+		if(knowledgeSessionConfiguration.getKnowledgeBaseRef() != null) {
 			
-			// Construction de la base de connaissance
-			knowledgeBase = buildKnowledgeBase(knowledgeSessionConfiguration.getKnowledgeBase());
+			// Obtention de la base de connaissance depuis la MAP des bases de connaissances
+			knowledgeBase = this.knowledgeBases.get(knowledgeSessionConfiguration.getKnowledgeBaseRef().getKnowledgeBase().trim());
+			
+			// Si la base de connaissance est nulle
+			if(knowledgeBase == null) 
+				throw new RuntimeException("Erreur lors de la construction de la session intelligente (stateful) : la base de connaissance referencee par '" + knowledgeSessionConfiguration.getKnowledgeBaseRef().getKnowledgeBase() + "' n'existe pas.");
 			
 		} else {
 			
+			// Obtention de l'agent intelligent depuis la MAP des aggents intelligents
+			knowledgeAgent = this.knowledgeAgents.get(knowledgeSessionConfiguration.getKnowledgeAgentRef().getKnowledgeAgent().trim());
+			
+			// Si l'agent est null
+			if(knowledgeAgent == null)
+				throw new RuntimeException("Erreur lors de la construction de la session intelligente (stateful) : l'agent intelligent referencee par '" + knowledgeSessionConfiguration.getKnowledgeAgentRef().getKnowledgeAgent() + "' n'existe pas.");
+			
 			// Construction de la base de connaissance
-			knowledgeBase = buildKnowledgeBase(knowledgeSessionConfiguration.getKnowledgeAgent());
+			knowledgeBase = knowledgeAgent.getKnowledgeBase();
+			
 		}
 		
-		// Construction de la session avec etat
+		// Construction de la session sans etat
 		StatefulKnowledgeSession statefulKnowledgeSession = knowledgeBase.newStatefulKnowledgeSession();
-
+		
 		// Si la session est a debogguer
 		if(knowledgeSessionConfiguration.isDebug()) {
 
@@ -294,7 +407,7 @@ public class DroolsEngine {
 			statefulKnowledgeSession.addEventListener(new DebugAgendaEventListener(System.out));
 		}
 		
-		// On retourne la session avec etat
+		// On retourne la session sans etat
 		return statefulKnowledgeSession;
 	}
 	
@@ -420,30 +533,49 @@ public class DroolsEngine {
 		// Construction de la configuration
 		DroolsServerConfiguration droolsServerConfiguration = this.serverConfigurationInitializer.initConfiguration();
 		
-		// Obtention de la liste des configurations des Sessions
-		List<KnowledgeSessionConfiguration> knowledgeSessionConfigurations = droolsServerConfiguration.getKnowledgeSession();
+		// Initialisation de la MAP des resources
+		buildResources(droolsServerConfiguration.getResources());
 		
-		// Parcours
-		for (KnowledgeSessionConfiguration knowledgeSessionConfiguration : knowledgeSessionConfigurations) {
-			
-			// Si c'est une session stateless
-			if(knowledgeSessionConfiguration.getType().equals(KnowledgeSessionTypeConfiguration.STATELESS)) {
+		// Initialisation de la MAP des Bases de connaissances
+		buildKnowledgeBases(droolsServerConfiguration.getKnowledgeBases());
+		
+		// Obtention de la configuration des agents intelligents
+		KnowledgeAgentsConfiguration knowledgeAgentsConfiguration = droolsServerConfiguration.getKnowledgeAgents();
+		
+		// Si la configuration est non nulle (Initialisation de la MAP des Agents intelligents)
+		if(knowledgeAgentsConfiguration != null) buildKnowledgeAgents(knowledgeAgentsConfiguration);
+		
+		// Obtention de la configuration de la liste des sessions
+		KnowledgeSessionsConfiguration knowledgeSessionsConfiguration = droolsServerConfiguration.getKnowledgeSessions();
+		
+		// Si la configuration est non nulle
+		if(knowledgeSessionsConfiguration != null) {
+
+			// Obtention de la liste des configurations des Sessions
+			List<KnowledgeSessionConfiguration> knowledgeSessionConfigurations = knowledgeSessionsConfiguration.getKnowledgeSession();
+
+			// Parcours
+			for (KnowledgeSessionConfiguration knowledgeSessionConfiguration : knowledgeSessionConfigurations) {
 				
-				// Creation de la session
-				StatelessKnowledgeSession statelessKnowledgeSession = buildStatelessKnowledgeSession(knowledgeSessionConfiguration);
+				// Si c'est une session stateless
+				if(knowledgeSessionConfiguration.getType().equals(KnowledgeSessionTypeConfiguration.STATELESS)) {
+					
+					// Creation de la session
+					StatelessKnowledgeSession statelessKnowledgeSession = buildStatelessKnowledgeSession(knowledgeSessionConfiguration);
+					
+					// Ajout de la session dans la MAP
+					knowledgeSessions.put(knowledgeSessionConfiguration.getName(), statelessKnowledgeSession);
+					
+				} else {
+					
+					// Creation de la session
+					StatefulKnowledgeSession statefulKnowledgeSession = buildStatefulKnowledgeSession(knowledgeSessionConfiguration);
+					
+					// Ajout de la session dans la MAP
+					knowledgeSessions.put(knowledgeSessionConfiguration.getName(), statefulKnowledgeSession);
+				}
 				
-				// Ajout de la session dans la MAP
-				knowledgeSessions.put(knowledgeSessionConfiguration.getName(), statelessKnowledgeSession);
-				
-			} else {
-				
-				// Creation de la session
-				StatefulKnowledgeSession statefulKnowledgeSession = buildStatefulKnowledgeSession(knowledgeSessionConfiguration);
-				
-				// Ajout de la session dans la MAP
-				knowledgeSessions.put(knowledgeSessionConfiguration.getName(), statefulKnowledgeSession);
 			}
-			
 		}
 		
 		// Si le service de monitoring des changements doit etre demarre

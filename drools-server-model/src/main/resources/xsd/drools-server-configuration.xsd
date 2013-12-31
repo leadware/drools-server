@@ -63,26 +63,52 @@
 	
 	<!-- Ressource -->
 	<complexType name="ResourceConfiguration">
+		<attribute name="name" type="string" use="required" />
 		<attribute name="type" type="tns:ResourceTypeConfiguration" use="optional" default="DRL" />
 		<attribute name="inClassPath" type="boolean" use="optional" default="true" />
 		<attribute name="path" type="string" use="required" />
 	</complexType>
 	
-	<!-- Base de connaissance -->
-	<complexType name="KnowledgeBaseConfiguration">
+	<!-- Ressource Ref -->
+	<complexType name="ResourceConfigurationRef">
+		<attribute name="resource-name" type="string" use="required" />
+	</complexType>
+	
+	<!-- Ressources -->
+	<complexType name="ResourcesConfiguration">
 		<sequence>
 			<element name="resource" type="tns:ResourceConfiguration" minOccurs="1" maxOccurs="unbounded" />
 		</sequence>
+	</complexType>
+	
+	<!-- Base de connaissance -->
+	<complexType name="KnowledgeBaseConfiguration">
+		<sequence>
+			<element name="resource-ref" type="tns:ResourceConfigurationRef" minOccurs="1" maxOccurs="unbounded" />
+		</sequence>
+		<attribute name="name" type="string" use="required" />
 		<attribute name="onDuplicateRule" type="tns:ResultSeverityConfiguration" use="optional" default="INFO" />
 		<attribute name="onDuplicateFunction" type="tns:ResultSeverityConfiguration" use="optional" default="INFO" />
 		<attribute name="multiThreadEvaluation" type="boolean" use="optional" default="false" />
 		<attribute name="maxEvaluationThreads" type="int" use="optional" default="3" />
 	</complexType>
 	
+	<!-- Bases de connaissance -->
+	<complexType name="KnowledgeBasesConfiguration">
+		<sequence>
+			<element name="knowledge-base" type="tns:KnowledgeBaseConfiguration" minOccurs="1" maxOccurs="unbounded" />
+		</sequence>
+	</complexType>
+	
+	<!-- Configuration de referencement d'une base de connaissance -->
+	<complexType name="KnowledgeBaseConfigurationRef">
+		<attribute name="knowledge-base" type="string" use="required" />
+	</complexType>
+	
 	<!-- Agent intelligent -->
 	<complexType name="KnowledgeAgentConfiguration">
 		<sequence>
-			<element name="knowledge-base" type="tns:KnowledgeBaseConfiguration" minOccurs="1" maxOccurs="1" />
+			<element name="knowledge-base-ref" type="tns:KnowledgeBaseConfigurationRef" minOccurs="1" maxOccurs="1" />
 		</sequence>
 		<attribute name="name" type="string" use="required" />
 		<attribute name="newInstance" type="boolean" fixed="false" />
@@ -91,33 +117,62 @@
 		<attribute name="scanPeriod" type="unsignedShort" use="optional" default="60" />
 	</complexType>
 	
+	<!-- Agents intelligent -->
+	<complexType name="KnowledgeAgentsConfiguration">
+		<sequence>
+			<element name="knowledge-agent" type="tns:KnowledgeAgentConfiguration" minOccurs="1" maxOccurs="unbounded" />
+		</sequence>
+	</complexType>
+	
+	<!-- Configuration de referencement d'un Agent -->
+	<complexType name="KnowledgeAgentConfigurationRef">
+		<attribute name="knowledge-agent" type="string" use="required" />
+	</complexType>
+	
 	<!-- Session intelligente -->
 	<complexType name="KnowledgeSessionConfiguration">
 		<choice>
-			<element name="knowledge-base" type="tns:KnowledgeBaseConfiguration" minOccurs="1" maxOccurs="1" />
-			<element name="knowledge-agent" type="tns:KnowledgeAgentConfiguration" minOccurs="1" maxOccurs="1" />
+			<element name="knowledge-base-ref" type="tns:KnowledgeBaseConfigurationRef" minOccurs="1" maxOccurs="1" />
+			<element name="knowledge-agent-ref" type="tns:KnowledgeAgentConfigurationRef" minOccurs="1" maxOccurs="1"/>
 		</choice>
 		<attribute name="name" type="string" use="required" />
 		<attribute name="type" type="tns:KnowledgeSessionTypeConfiguration" use="optional" default="STATELESS" />
 		<attribute name="debug" type="boolean" use="optional" default="false" />
 	</complexType>
 	
-	<!-- Drools server configuration -->
-	<complexType name="DroolsServerConfiguration">
+	<!-- Sessions intelligente -->
+	<complexType name="KnowledgeSessionsConfiguration">
 		<sequence>
 			<element name="knowledge-session" type="tns:KnowledgeSessionConfiguration" minOccurs="1" maxOccurs="unbounded" />
 		</sequence>
 	</complexType>
 	
+	<!-- Drools server configuration -->
+	<complexType name="DroolsServerConfiguration">
+		<sequence>
+			<element name="resources" type="tns:ResourcesConfiguration" minOccurs="1" maxOccurs="1"/>
+			<element name="knowledge-bases" type="tns:KnowledgeBasesConfiguration" minOccurs="1" maxOccurs="1"/>
+			<element name="knowledge-agents" type="tns:KnowledgeAgentsConfiguration" minOccurs="0" maxOccurs="1"/>
+			<element name="knowledge-sessions" type="tns:KnowledgeSessionsConfiguration" minOccurs="0" maxOccurs="1" />
+		</sequence>
+	</complexType>
 	
 	<!-- Drools Server Root Element -->
 	<element name="drools-server" type="tns:DroolsServerConfiguration">
-		<unique name="uniqueSessionNme">
-			<selector xpath="tns:knowledge-session" />
+		<unique name="uniqueSessionName">
+			<selector xpath="tns:knowledge-sessions/tns:knowledge-session" />
 			<field xpath="@name" />
 		</unique>
 		<unique name="uniqueAgentName">
-			<selector xpath="tns:knowledge-session/tns:knowledge-agent" />
+			<selector xpath="tns:knowledge-agents/tns:knowledge-agent" />
+			<field xpath="@name" />
+		</unique>
+		<unique name="uniqueResourceName">
+			<selector xpath="tns:resources/tns:resource" />
+			<field xpath="@name" />
+		</unique>
+		<unique name="uniqueBaseName">
+			<selector xpath="tns:knowledge-bases/tns:knowledge-base" />
 			<field xpath="@name" />
 		</unique>
 	</element>

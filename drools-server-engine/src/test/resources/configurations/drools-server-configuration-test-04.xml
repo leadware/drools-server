@@ -22,26 +22,20 @@
   -->
 
 <drools-server xmlns="http://www.leadware.net/drools-server-configuration" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.leadware.net/drools-server-configuration http://www.leadware.net/drools-server-configuration ">
-	<knowledge-session name="ksession-test-01" type="STATELESS">
-	    <knowledge-base>
-	    	<resource path="resource-path-01.drl" type="DRL" inClassPath="true"/>
-	    	<resource path="resource-path-02.xml" type="CHANGE_SET" inClassPath="false"/>
-	    </knowledge-base>
-  	</knowledge-session>
-  	<knowledge-session name="ksession-test-02" type="STATEFUL">
-	  	<knowledge-agent name="agent-test-02" newInstance="false" scanPeriod="60">
-	  		<knowledge-base>
-	  			<resource path="resource-path-02.drl" type="DRL" inClassPath="false"/>
-	    		<resource path="resource-path-02.xml" type="CHANGE_SET" inClassPath="false"/>
-	  		</knowledge-base>
-	  	</knowledge-agent>
-  	</knowledge-session>
-  	<knowledge-session name="ksession-test-03" type="STATEFUL">
-	  	<knowledge-agent name="agent-test-02" newInstance="false" scanPeriod="60">
-	  		<knowledge-base>
-	  			<resource path="resource-path-02.drl" type="DRL" inClassPath="false"/>
-	    		<resource path="resource-path-02.xml" type="CHANGE_SET" inClassPath="false"/>
-	  		</knowledge-base>
-	  	</knowledge-agent>
-  	</knowledge-session>
+	<resources>
+		<resource name="ressource_01" path="drools/validation.drl" type="DRL" inClassPath="true"/>
+	</resources>
+	<knowledge-bases>
+		<knowledge-base name="kbase_01">
+			<resource-ref resource-name="ressource_01"/>
+		</knowledge-base>
+	</knowledge-bases>
+	<knowledge-agents>
+		<knowledge-agent name="kagent_01">
+			<knowledge-base-ref knowledge-base="kbase_01"/>
+		</knowledge-agent>
+		<knowledge-agent name="kagent_01">
+			<knowledge-base-ref knowledge-base="kbase_01"/>
+		</knowledge-agent>
+	</knowledge-agents>
 </drools-server>

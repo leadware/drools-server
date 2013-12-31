@@ -258,7 +258,7 @@ public class DroolsServerConfigurationInitializer {
 		} catch (JAXBException e) {
 			
 			// On relance
-			throw new RuntimeException("Erreur survenue lors de la validation du fichier de configuration du serveur Drools [ligne: " + handler.getLine() + ", colonne: " + handler.getColumn() + ", Erreur: " + handler.getMessage() + "]", handler.getLinkedException());
+			throw new RuntimeException("Erreur survenue lors de la validation du fichier de configuration du serveur Drools [Fichier : " + ENVHelper.resolveEnvironmentsParameters(configurationPath) + ", ligne: " + handler.getLine() + ", colonne: " + handler.getColumn() + ", Erreur: " + handler.getMessage() + "]", handler.getLinkedException());
 		}
 		
 		// On retourne la configuration

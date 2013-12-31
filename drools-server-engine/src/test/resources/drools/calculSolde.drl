@@ -1,0 +1,16 @@
+package  drools;
+
+import java.util.ArrayList;
+import java.util.List;
+
+global TbPeriodeSalaire periode;
+global IEltPeriodiqueService eltPeriodiqueService;
+
+rule "select_non_radies"
+dialect "java"
+when
+	$agent : TbAgent(position.cposAdmin != "60")
+then
+	TbBulletin bulletin = BulletinFactory.creerBulletin($agent, periode);
+	
+	List<> lstElementPeriod = eltPeriodiqueService.rechercherParAgent($agent);

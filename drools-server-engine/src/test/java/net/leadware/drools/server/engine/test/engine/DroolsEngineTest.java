@@ -38,11 +38,19 @@ import java.util.List;
 import net.leadware.drools.server.engine.DroolsEngine;
 
 import org.apache.log4j.Logger;
+import org.drools.KnowledgeBase;
+import org.drools.KnowledgeBaseFactory;
+import org.drools.builder.KnowledgeBuilder;
+import org.drools.builder.KnowledgeBuilderFactory;
+import org.drools.builder.ResourceType;
 import org.drools.command.runtime.BatchExecutionCommandImpl;
 import org.drools.command.runtime.SetGlobalCommand;
 import org.drools.command.runtime.rule.FireAllRulesCommand;
 import org.drools.command.runtime.rule.InsertObjectCommand;
+import org.drools.io.ResourceFactory;
+import org.drools.runtime.StatefulKnowledgeSession;
 import org.drools.runtime.StatelessKnowledgeSession;
+import org.drools.runtime.rule.AgendaGroup;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -236,7 +244,7 @@ public class DroolsEngineTest {
 		droolsEngine.start();
 		
 		// Nom de la session
-		String sessionName = "ksession-test-01";
+		String sessionName = "printruleksession";
 		
 		// Obtention de la session
 		final StatelessKnowledgeSession knowledgeSession = (StatelessKnowledgeSession) droolsEngine.getKnowledgeSession(sessionName);
@@ -314,7 +322,7 @@ public class DroolsEngineTest {
 		droolsEngine.start();
 		
 		// Nom de la session
-		String sessionName = "ksession-test-01";
+		String sessionName = "printruleksession";
 		
 		// Variable globale
 		ValidationResult validationResult = new ValidationResult();
@@ -366,7 +374,7 @@ public class DroolsEngineTest {
 			
 			// Ajout du fireall
 			batch.getCommands().add(fireall);
-
+			
 			// Execution
 			droolsEngine.execute(batch);
 		}
@@ -382,5 +390,42 @@ public class DroolsEngineTest {
 		// Arret du moteur
 		droolsEngine.stop();
 	}
+	
+	public static void main(String[] args) throws ParseException {
+		
+		KnowledgeBase base = KnowledgeBaseFactory.newKnowledgeBase();
+		
+		KnowledgeBuilder kb = KnowledgeBuilderFactory.newKnowledgeBuilder();
+		
+		kb.add(ResourceFactory.newClassPathResource("drools/testrule.drl"), ResourceType.DRL);
+		
 
+		// S'il y a des erreurs
+		if(kb.hasErrors()) {
+			
+			// On leve une exceprion
+			throw new RuntimeException("Erreur lors du chargement des ressources metier : " + kb.getErrors().toString());
+		}
+		
+		base.addKnowledgePackages(kb.getKnowledgePackages());
+		
+		StatefulKnowledgeSession session = base.newStatefulKnowledgeSession();
+		
+		AgendaGroup ag01 = session.getAgenda().getAgendaGroup("ag01");
+		AgendaGroup ag02 = session.getAgenda().getAgendaGroup("ag02");
+		
+		Agent agent = new Agent("MAT01", "NOM01", "PRENOM01", dateformat.parse("28/02/1981"), "DG");
+		
+		ag01.setFocus();
+		session.insert(agent);
+		
+		System.out.println("Agent avant la regle et l'agenda 01 : " + agent);
+		session.fireAllRules();
+		System.out.println("Agent apres la regle et l'agenda 01 : " + agent);
+		agent.setPrenom("PRENOM02");
+		System.out.println("Agent avant la regle et l'agenda 02 : " + agent);
+		ag02.setFocus();
+		session.fireAllRules();
+		
+	}
 }
