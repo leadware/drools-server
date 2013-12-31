@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.leadware.drools.server.engine.DroolsEngine;
+import net.leadware.drools.server.tools.collection.CollectionHelper;
 
 import org.apache.log4j.Logger;
 import org.drools.KnowledgeBase;
@@ -119,14 +120,14 @@ public class DroolsEngineTest {
 		droolsEngine.start();
 		
 		// Nom de la session
-		String sessionName = "ksession-test-01";
+		String sessionName = "ksession-validation";
 		
 		// Verifications
 		assertTrue(droolsEngine.isSessionExists(sessionName));
-		assertTrue(droolsEngine.isStatelessSession(sessionName));
+		assertTrue(droolsEngine.isStatefulSession((sessionName)));
 		
 		// Obtention de la session
-		StatelessKnowledgeSession knowledgeSession = (StatelessKnowledgeSession) droolsEngine.getKnowledgeSession(sessionName);
+		StatefulKnowledgeSession knowledgeSession = (StatefulKnowledgeSession) droolsEngine.getKnowledgeSession(sessionName);
 		
 		// Agent a valider
 		Agent agent = new Agent("", "YASHIRO", "NANAKAZE", dateformat.parse("28/03/1981"), "DG");
@@ -137,8 +138,11 @@ public class DroolsEngineTest {
 		// Positionnement de la variable globale
 		knowledgeSession.setGlobal("result", validationResult);
 		
+		// Insertion
+		knowledgeSession.insert(agent);
+		
 		// Execution
-		knowledgeSession.execute(agent);
+		knowledgeSession.fireAllRules();
 		
 		// Verification
 		assertNotNull(validationResult.getText());
@@ -148,7 +152,7 @@ public class DroolsEngineTest {
 		droolsEngine.stop();
 	}
 	
-	//@Test
+	@Test
 	public void testMasseExecutionPas() throws ParseException, InterruptedException {
 		
 		// Moteur Drools
@@ -170,10 +174,10 @@ public class DroolsEngineTest {
 		droolsEngine.start();
 		
 		// Nom de la session
-		String sessionName = "ksession-test-01";
+		String sessionName = "printruleksession";
 		
 		// Obtention de la session
-		final StatelessKnowledgeSession knowledgeSession = (StatelessKnowledgeSession) droolsEngine.getKnowledgeSession(sessionName);
+		final StatefulKnowledgeSession knowledgeSession = (StatefulKnowledgeSession) droolsEngine.getKnowledgeSession(sessionName);
 		
 		// Variable globale
 		ValidationResult validationResult = new ValidationResult();
@@ -185,7 +189,7 @@ public class DroolsEngineTest {
 		final List<Agent> agents = new ArrayList<Agent>();
 		
 		// Pas de decoupage
-		int pas = 6000;
+		int pas = 10;
 		
 		// Un log
 		log.info("Construction de la liste globale");
@@ -203,24 +207,53 @@ public class DroolsEngineTest {
 		// Un log
 		log.info("Execution de la liste de taille : " + size + ", en pas de : " + pas);
 		
+		// Splitting des listes
+		List<List<Agent>> subLists = CollectionHelper.splitList(agents, pas);
+		
+		List<MyThread> threads = new ArrayList<DroolsEngineTest.MyThread>();
+		
 		// Parcours d'execution pas a pas
-		for(int i = 0; i <= size - pas + 1; i+=pas) {
+		for(List<Agent> subList : subLists) {
 			
-			// Execution
-			knowledgeSession.execute(agents.subList(i, i+pas-1));
+			// Instanciation d'un Thread
+			MyThread t = new MyThread();
+			
+			// Positionnement de la sous-liste a traiter
+			t.setAgents(subList);
+			
+			// Positionnement de la base de connaissance a utiliser
+			t.setBase(droolsEngine.getKnowledgeBase("printrulekbase"));
+			
+			// Demarrage du process
+			t.start();
+			
+			// Ajout
+			threads.add(t);
 		}
 
+		for (MyThread myThread : threads) {
+			
+			synchronized (myThread) {
+
+				if(myThread.isAlive()) myThread.wait();
+			}
+		}
+		
 		// Date/Heure de demarrage de l'execution
 		long endProcess = System.currentTimeMillis();
+
+		// Arret du moteur
+		droolsEngine.stop();
 		
 		// Log
 		log.info("Taille de la liste de faits					:	" + size);
 		log.info("Quantite des donnees inseree dans la session	:	" + pas);
 		log.info("Durée d'execution des regles					:	" + (endProcess - startProcess)/(1000) + " Secondes");
-		
-		// Arret du moteur
-		droolsEngine.stop();
 	}
+	
+	
+	
+	
 	
 	//@Test
 	public void testMasseExecutionPasUnitaire() throws ParseException, InterruptedException {
@@ -300,7 +333,7 @@ public class DroolsEngineTest {
 	 * Test method for {@link net.leadware.drools.server.engine.DroolsEngine#execute()}.
 	 * @throws ParseException 
 	 */
-	@Test
+	//@Test
 	public void testExecute() throws ParseException {
 		
 		// Moteur Drools
@@ -426,6 +459,76 @@ public class DroolsEngineTest {
 		System.out.println("Agent avant la regle et l'agenda 02 : " + agent);
 		ag02.setFocus();
 		session.fireAllRules();
+		
+	}
+	
+	class MyThread extends Thread {
+		
+		List<Agent> agents = new ArrayList<Agent>();
+		
+		KnowledgeBase base;
+		
+		@Override
+		public void run() {
+			
+			synchronized (this) {
+				
+				// Construction de la session sans etat
+				StatefulKnowledgeSession knowledgeSession = base.newStatefulKnowledgeSession();
+
+				// Positionnement de la variable globale
+				knowledgeSession.setGlobal("result", new ValidationResult());
+				
+				// Parcours de la sous-liste
+				for(Agent agent : agents) {
+					
+					// Insertion
+					knowledgeSession.insert(agent);
+				}
+				
+				// Execution
+				knowledgeSession.fireAllRules();
+
+				// Notif
+				notify();
+			}
+		}
+
+		/**
+		 * Methode d'obtention du champ "agents"
+		 * @return champ "agents"
+		 */
+		public List<Agent> getAgents() {
+			// Renvoi de la valeur du champ
+			return agents;
+		}
+
+		/**
+		 * Methode de modification du champ "agents"
+		 * @param agents champ agents a modifier
+		 */
+		public void setAgents(List<Agent> agents) {
+			// Modification de la valeur du champ
+			this.agents = agents;
+		}
+
+		/**
+		 * Methode d'obtention du champ "base"
+		 * @return champ "base"
+		 */
+		public KnowledgeBase getBase() {
+			// Renvoi de la valeur du champ
+			return base;
+		}
+
+		/**
+		 * Methode de modification du champ "base"
+		 * @param base champ base a modifier
+		 */
+		public void setBase(KnowledgeBase base) {
+			// Modification de la valeur du champ
+			this.base = base;
+		}
 		
 	}
 }

@@ -22,9 +22,17 @@
   -->
 
 <drools-server xmlns="http://www.leadware.net/drools-server-configuration" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.leadware.net/drools-server-configuration http://www.leadware.net/drools-server-configuration ">
-	<knowledge-session name="ksession-test-01" type="STATELESS">
-	    <knowledge-base>
-	    	<resource path="drools/validation.drl" type="DRL" inClassPath="true"/>
-	    </knowledge-base>
-  	</knowledge-session>
+	<resources>
+		<resource name="validation" path="drools/validation.drl" inClassPath="true"/>
+	</resources>
+	<knowledge-bases>
+		<knowledge-base name="kbase-validation">
+			<resource-ref resource-name="validation"/>
+		</knowledge-base>
+	</knowledge-bases>
+	<knowledge-sessions>
+		<knowledge-session name="ksession-validation">
+			<knowledge-base-ref knowledge-base="kbase-validation"/>
+		</knowledge-session>
+	</knowledge-sessions>
 </drools-server>

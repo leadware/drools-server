@@ -31,7 +31,7 @@
 		</knowledge-base>
 	</knowledge-bases>
 	<knowledge-sessions>
-		<knowledge-session name="printruleksession" type="STATELESS">
+		<knowledge-session name="printruleksession" type="STATEFUL">
 			<knowledge-base-ref knowledge-base="printrulekbase"/>
 		</knowledge-session>
 	</knowledge-sessions>

@@ -707,6 +707,56 @@ public class DroolsEngine {
 		// On retourne la session
 		return knowledgeSessions.get(sessionName.trim());
 	}
+
+	/**
+	 * Methode permettant d'obtenir une base de connaissance
+	 * @param baseName	Nom de la base de connaissance
+	 * @return	Base de connaissance
+	 */
+	public KnowledgeBase getKnowledgeBase(String baseName) {
+		
+		// Si la base n'existe pas
+		if(!isBaseExists(baseName)) return null;
+		
+		// On retourne la base
+		return knowledgeBases.get(baseName.trim());
+	}
+	
+	/**
+	 * Methode permettant de tester si une base de connaissance existe
+	 * @param baseName	Nom de la base de connaissance
+	 * @return	Etat d'existence de la base de connaissance
+	 */
+	public boolean isBaseExists(String baseName) {
+		
+		// on retourne l'etat d'existence
+		return (baseName != null) && (!baseName.trim().isEmpty()) && (knowledgeBases.get(baseName.trim()) != null);
+	}
+
+	/**
+	 * Methode permettant d'obtenir un agent intelligent
+	 * @param sessionName	Nom de l'agent
+	 * @return	Agent intelligent
+	 */
+	public KnowledgeAgent getKnowledgeAgent(String agentName) {
+		
+		// Si l'agent n'existe pas
+		if(!isAgentExists(agentName)) return null;
+		
+		// On retourne l'agent
+		return knowledgeAgents.get(agentName.trim());
+	}
+	
+	/**
+	 * Methode permettant de tester si une agent intelligent existe
+	 * @param agentName	Nom de l'agent
+	 * @return	Etat d'existence de l'agent
+	 */
+	public boolean isAgentExists(String agentName) {
+		
+		// on retourne l'etat d'existence
+		return (agentName != null) && (!agentName.trim().isEmpty()) && (knowledgeAgents.get(agentName.trim()) != null);
+	}
 	
 	/**
 	 * Methode d'execution d'une liste de commandes
