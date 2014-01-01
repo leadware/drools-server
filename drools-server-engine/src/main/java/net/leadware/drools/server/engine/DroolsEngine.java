@@ -707,7 +707,7 @@ public class DroolsEngine {
 		// On retourne la session
 		return knowledgeSessions.get(sessionName.trim());
 	}
-
+	
 	/**
 	 * Methode permettant d'obtenir une base de connaissance
 	 * @param baseName	Nom de la base de connaissance
@@ -759,46 +759,109 @@ public class DroolsEngine {
 	}
 	
 	/**
-	 * Methode d'execution d'une liste de commandes
-	 * @param commands	Liste de commandes a executer
-	 * @return Map des resultats de l'execution de la liste de commandes
+	 * Methode permettant de creer une session stateless a partir d'un agent intelligent
+	 * @param sessionName	Nom de la session a creer
+	 * @param agentName Nom de l'agent intelligent source
+	 * @param overwrite Etat d'ecrasement d'une session existante
+	 * @return	Agent intelligent
 	 */
-	public ExecutionResults execute(String sessionName, List<GenericCommand<?>> commands) {
+	public void newStatelessSessionFromAgent(String sessionName, String agentName, boolean overwrite) {
+
+		// Si le nom de la session est vide
+		if(sessionName == null || sessionName.trim().isEmpty()) throw new RuntimeException("net.leadware.drools.engine.create.sessionfromagent.sessionnameempty");
 		
-		// Obtention de la session objet 
-		Object oSession = getKnowledgeSession(sessionName);
+		// Si l'agent n'existe pas
+		if(!isAgentExists(agentName)) throw new RuntimeException("net.leadware.drools.engine.create.sessionfromagent.agentnotfound");
 		
-		// Si la session n'existe pas
-		if(oSession == null) throw new RuntimeException("net.leadware.drools.engine.execute.commands.sessionnotfound");
+		// Si la session existe et qu'on ne doit pas ecraser
+		if(isSessionExists(sessionName) && !overwrite)  throw new RuntimeException("net.leadware.drools.engine.create.sessionfromagent.sessionexists.nooverwrite");
 		
-		// Si la liste de commandes est vide
-		if(commands == null || commands.isEmpty()) throw new RuntimeDroolsException("net.leadware.drools.engine.execute.commands.emptycommandslist");
+		// Obtention de l'agent
+		KnowledgeAgent knowledgeAgent = knowledgeAgents.get(agentName);
 		
-		// Resultat de l'execution
-		ExecutionResults result = null;
+		// Obtention de la base de connaissance
+		KnowledgeBase knowledgeBase = knowledgeAgent.getKnowledgeBase();
 		
-		// Si on est en Stateless
-		if(isStatelessSession(sessionName)) {
-			
-			// On caste
-			StatelessKnowledgeSession knowledgeSession = (StatelessKnowledgeSession) oSession;
-			
-			// Execution
-			result = knowledgeSession.execute(CommandFactory.newBatchExecution(commands));
-			
-		} else {
-			
-			// On caste
-			StatefulKnowledgeSession knowledgeSession = (StatefulKnowledgeSession) oSession;
-			
-			// Execution
-			result = knowledgeSession.execute(CommandFactory.newBatchExecution(commands));
-		}
-		
-		// On retourne le resultat
-		return result;
+		// Ajout de la session
+		knowledgeSessions.put(sessionName, knowledgeBase.newStatelessKnowledgeSession());
 	}
 
+	/**
+	 * Methode permettant de creer une session stateful a partir d'un agent intelligent
+	 * @param sessionName	Nom de la session a creer
+	 * @param agentName Nom de l'agent intelligent source
+	 * @param overwrite Etat d'ecrasement d'une session existante
+	 * @return	Agent intelligent
+	 */
+	public void newStatefulSessionFromAgent(String sessionName, String agentName, boolean overwrite) {
+		
+		// Si le nom de la session est vide
+		if(sessionName == null || sessionName.trim().isEmpty()) throw new RuntimeException("net.leadware.drools.engine.create.sessionfromagent.sessionnameempty");
+		
+		// Si l'agent n'existe pas
+		if(!isAgentExists(agentName)) throw new RuntimeException("net.leadware.drools.engine.create.sessionfromagent.agentnotfound");
+		
+		// Si la session existe et qu'on ne doit pas ecraser
+		if(isSessionExists(sessionName) && !overwrite)  throw new RuntimeException("net.leadware.drools.engine.create.sessionfromagent.sessionexists.nooverwrite");
+		
+		// Obtention de l'agent
+		KnowledgeAgent knowledgeAgent = knowledgeAgents.get(agentName);
+		
+		// Obtention de la base de connaissance
+		KnowledgeBase knowledgeBase = knowledgeAgent.getKnowledgeBase();
+		
+		// Ajout de la session
+		knowledgeSessions.put(sessionName.trim(), knowledgeBase.newStatefulKnowledgeSession());
+	}
+	
+	/**
+	 * Methode permettant de creer une session stateless a partir d'une base de connaissance
+	 * @param sessionName	Nom de la session a creer
+	 * @param baseName	Nom de la base de connaissance source
+	 * @param overwrite Etat d'ecrasement d'une session existante
+	 */
+	public void newStatelessSessionFromBase(String sessionName, String baseName, boolean overwrite) {
+		
+		// Si le nom de la session est vide
+		if(sessionName == null || sessionName.trim().isEmpty()) throw new RuntimeException("net.leadware.drools.engine.create.sessionfrombase.sessionnameempty");
+		
+		// Si l'agent n'existe pas
+		if(!isBaseExists(baseName)) throw new RuntimeException("net.leadware.drools.engine.create.sessionfrombase.basenotfound");
+		
+		// Si la session existe et qu'on ne doit pas ecraser
+		if(isSessionExists(sessionName) && !overwrite)  throw new RuntimeException("net.leadware.drools.engine.create.sessionfrombase.sessionexists.nooverwrite");
+		
+		// Obtention de la base de connaissance
+		KnowledgeBase knowledgeBase = knowledgeBases.get(baseName);
+		
+		// Ajout de la session
+		knowledgeSessions.put(sessionName.trim(), knowledgeBase.newStatelessKnowledgeSession());
+	}
+	
+	/**
+	 * Methode permettant de creer une session statefull a partir d'une base de connaissance
+	 * @param sessionName	Nom de la session a creer
+	 * @param baseName	Nom de la base de connaissance
+	 * @param overwrite Etat d'ecrasement d'une session existante
+	 */
+	public void newStatefulSessionFromBase(String sessionName, String baseName, boolean overwrite) {
+		
+		// Si le nom de la session est vide
+		if(sessionName == null || sessionName.trim().isEmpty()) throw new RuntimeException("net.leadware.drools.engine.create.sessionfrombase.sessionnameempty");
+		
+		// Si l'agent n'existe pas
+		if(!isBaseExists(baseName)) throw new RuntimeException("net.leadware.drools.engine.create.sessionfrombase.basenotfound");
+		
+		// Si la session existe et qu'on ne doit pas ecraser
+		if(isSessionExists(sessionName) && !overwrite)  throw new RuntimeException("net.leadware.drools.engine.create.sessionfrombase.sessionexists.nooverwrite");
+		
+		// Obtention de la base de connaissance
+		KnowledgeBase knowledgeBase = knowledgeBases.get(baseName);
+		
+		// Ajout de la session
+		knowledgeSessions.put(sessionName.trim(), knowledgeBase.newStatefulKnowledgeSession());
+	}
+	
 	/**
 	 * Methode d'execution d'une commandes batch
 	 * @param command	Commandes batch a executer
@@ -843,4 +906,140 @@ public class DroolsEngine {
 		return result;
 	}
 	
+	/**
+	 * Methode d'execution d'une commandes batch sur une session creee sur une base de connaissace donnee
+	 * @param baseName Base de connaissance source
+	 * @param command	Commandes batch a executer
+	 * @return Map des resultats de l'execution de la liste de commandes
+	 */
+	public ExecutionResults executeOnBase(String baseName, BatchExecutionCommandImpl command) {
+		
+		// Si la base n'existe pas
+		if(!isBaseExists(baseName)) throw new RuntimeException("net.leadware.drools.engine.execute.commands.onbase.basenotfound");
+		
+		// Obtention de la base
+		KnowledgeBase knowledgeBase = knowledgeBases.get(baseName.trim());
+		
+		// Creation de la session stateless
+		StatelessKnowledgeSession statelessKnowledgeSession = knowledgeBase.newStatelessKnowledgeSession();
+		
+		// Execution de la commande
+		ExecutionResults result = statelessKnowledgeSession.execute(command);
+		
+		// On retourne le resultat
+		return result;
+	}
+	
+	/**
+	 * Methode d'execution d'une commandes batch sur une session creee sur une agent intelligent
+	 * @param agentName Base de connaissance source
+	 * @param command	Commandes batch a executer
+	 * @return Map des resultats de l'execution de la liste de commandes
+	 */
+	public ExecutionResults executeOnAgent(String agentName, BatchExecutionCommandImpl command) {
+		
+		// Si la base n'existe pas
+		if(!isAgentExists(agentName)) throw new RuntimeException("net.leadware.drools.engine.execute.commands.onagent.agentnotfound");
+		
+		// Obtention de la base
+		KnowledgeBase knowledgeBase = knowledgeAgents.get(agentName.trim()).getKnowledgeBase();
+		
+		// Creation de la session stateless
+		StatelessKnowledgeSession statelessKnowledgeSession = knowledgeBase.newStatelessKnowledgeSession();
+		
+		// Execution de la commande
+		ExecutionResults result = statelessKnowledgeSession.execute(command);
+		
+		// On retourne le resultat
+		return result;
+	}
+
+	/**
+	 * Methode d'execution d'une liste de commandes
+	 * @param commands	Liste de commandes a executer
+	 * @return Map des resultats de l'execution de la liste de commandes
+	 */
+	public ExecutionResults execute(String sessionName, List<GenericCommand<?>> commands) {
+		
+		// Obtention de la session objet 
+		Object oSession = getKnowledgeSession(sessionName);
+		
+		// Si la session n'existe pas
+		if(oSession == null) throw new RuntimeException("net.leadware.drools.engine.execute.commands.sessionnotfound");
+		
+		// Si la liste de commandes est vide
+		if(commands == null || commands.isEmpty()) throw new RuntimeDroolsException("net.leadware.drools.engine.execute.commands.emptycommandslist");
+		
+		// Resultat de l'execution
+		ExecutionResults result = null;
+		
+		// Si on est en Stateless
+		if(isStatelessSession(sessionName)) {
+			
+			// On caste
+			StatelessKnowledgeSession knowledgeSession = (StatelessKnowledgeSession) oSession;
+			
+			// Execution
+			result = knowledgeSession.execute(CommandFactory.newBatchExecution(commands));
+			
+		} else {
+			
+			// On caste
+			StatefulKnowledgeSession knowledgeSession = (StatefulKnowledgeSession) oSession;
+			
+			// Execution
+			result = knowledgeSession.execute(CommandFactory.newBatchExecution(commands));
+		}
+		
+		// On retourne le resultat
+		return result;
+	}
+
+	/**
+	 * Methode d'execution d'une liste de commandes sur une base de connaissance
+	 * @param baseName Nom de la base de connaissance source
+	 * @param commands	Liste de commandes a executer
+	 * @return Map des resultats de l'execution de la liste de commandes
+	 */
+	public ExecutionResults executeOnBase(String baseName, List<GenericCommand<?>> commands) {
+		
+		// Si la base n'existe pas
+		if(!isBaseExists(baseName)) throw new RuntimeException("net.leadware.drools.engine.execute.commands.onbase.basenotfound");
+		
+		// Obtention de la base
+		KnowledgeBase knowledgeBase = knowledgeBases.get(baseName.trim());
+		
+		// Creation de la session stateless
+		StatelessKnowledgeSession statelessKnowledgeSession = knowledgeBase.newStatelessKnowledgeSession();
+		
+		// Execution de la commande
+		ExecutionResults result = statelessKnowledgeSession.execute(CommandFactory.newBatchExecution(commands));
+		
+		// On retourne le resultat
+		return result;
+	}
+
+	/**
+	 * Methode d'execution d'une liste de commandes sur un agent intelligent
+	 * @param agentName Nom de l'agent intelligent source
+	 * @param commands	Liste de commandes a executer
+	 * @return Map des resultats de l'execution de la liste de commandes
+	 */
+	public ExecutionResults executeOnAgent(String agentName, List<GenericCommand<?>> commands) {
+		
+		// Si la base n'existe pas
+		if(!isAgentExists(agentName)) throw new RuntimeException("net.leadware.drools.engine.execute.commands.onagent.agentnotfound");
+		
+		// Obtention de la base
+		KnowledgeBase knowledgeBase = knowledgeAgents.get(agentName.trim()).getKnowledgeBase();
+		
+		// Creation de la session stateless
+		StatelessKnowledgeSession statelessKnowledgeSession = knowledgeBase.newStatelessKnowledgeSession();
+		
+		// Execution de la commande
+		ExecutionResults result = statelessKnowledgeSession.execute(CommandFactory.newBatchExecution(commands));
+		
+		// On retourne le resultat
+		return result;
+	}
 }
