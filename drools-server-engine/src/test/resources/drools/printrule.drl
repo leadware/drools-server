@@ -16,5 +16,5 @@ then
     // On positionne le resultat
     result.setText("Le matricule de l'objet est vide");
     
-    System.out.println("MATRICULE : " + $matricule);
+    //System.out.println("MATRICULE : " + $matricule);
 end

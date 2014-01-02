@@ -802,8 +802,22 @@ public class DroolsEngine {
 		if(!isAgentExists(agentName)) throw new RuntimeException("net.leadware.drools.engine.create.sessionfromagent.agentnotfound");
 		
 		// Si la session existe et qu'on ne doit pas ecraser
-		if(isSessionExists(sessionName) && !overwrite)  throw new RuntimeException("net.leadware.drools.engine.create.sessionfromagent.sessionexists.nooverwrite");
-		
+		if(isSessionExists(sessionName)) {
+			
+			// Si on ne doit pas ecraser
+			if(!overwrite) throw new RuntimeException("net.leadware.drools.engine.create.sessionfromagent.agentnotfound");
+			
+			// Si la session est stateful
+			if(isStatefulSession(sessionName)) {
+				
+				try {
+					
+					// Liberation des ressources
+					((StatefulKnowledgeSession)getKnowledgeSession(sessionName)).dispose();
+					
+				} catch (Exception e) {}
+			}
+		}
 		// Obtention de l'agent
 		KnowledgeAgent knowledgeAgent = knowledgeAgents.get(agentName);
 		
@@ -853,7 +867,22 @@ public class DroolsEngine {
 		if(!isBaseExists(baseName)) throw new RuntimeException("net.leadware.drools.engine.create.sessionfrombase.basenotfound");
 		
 		// Si la session existe et qu'on ne doit pas ecraser
-		if(isSessionExists(sessionName) && !overwrite)  throw new RuntimeException("net.leadware.drools.engine.create.sessionfrombase.sessionexists.nooverwrite");
+		if(isSessionExists(sessionName)) {
+			
+			// Si on ne doit pas ecraser
+			if(!overwrite) throw new RuntimeException("net.leadware.drools.engine.create.sessionfrombase.sessionexists.nooverwrite");
+			
+			// Si la session est stateful
+			if(isStatefulSession(sessionName)) {
+				
+				try {
+					
+					// Liberation des ressources
+					((StatefulKnowledgeSession)getKnowledgeSession(sessionName)).dispose();
+					
+				} catch (Exception e) {}
+			}
+		}
 		
 		// Obtention de la base de connaissance
 		KnowledgeBase knowledgeBase = knowledgeBases.get(baseName);
@@ -1041,5 +1070,25 @@ public class DroolsEngine {
 		
 		// On retourne le resultat
 		return result;
+	}
+	
+	/**
+	 * Methode permettant de liberer une session
+	 * @param sessionName	Nom de la session
+	 */
+	public void disposeSession(String sessionName) {
+		
+		// Si la session n'existe pas
+		if(!isSessionExists(sessionName)) return;
+		
+		// Si la session est de type stateless
+		if(isStatelessSession(sessionName)) return;
+
+		try {
+			
+			// Liberation des ressources
+			((StatefulKnowledgeSession)getKnowledgeSession(sessionName)).dispose();
+			
+		} catch (Exception e) {}
 	}
 }
