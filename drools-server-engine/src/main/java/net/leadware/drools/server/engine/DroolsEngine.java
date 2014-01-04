@@ -120,8 +120,8 @@ public class DroolsEngine {
 	}
 	
 	/**
-	 * Methode permettant de construire une base de connaissance a partir de la base de connaissance configuree
-	 * @param knowledgeBaseConfiguration	Configuration de base de connaissance	
+	 * Methode permettant de construire une knowledgeBaseName de connaissance a partir de la knowledgeBaseName de connaissance configuree
+	 * @param knowledgeBaseConfiguration	Configuration de knowledgeBaseName de connaissance	
 	 * @return	Base de connaissance Drools
 	 */
 	private KnowledgeBase buildKnowledgeBase(KnowledgeBaseConfiguration knowledgeBaseConfiguration) {
@@ -179,7 +179,7 @@ public class DroolsEngine {
 			
 			// Si la ressource n'existe pas
 			if(resourceConfiguration == null) 
-				throw new RuntimeException("Erreur lors de la construction de la base de connaissance : la ressource referencee par '" + resourceConfigurationref.getResourceName() + "' n'existe pas.");
+				throw new RuntimeException("Erreur lors de la construction de la knowledgeBaseName de connaissance : la ressource referencee par '" + resourceConfigurationref.getResourceName() + "' n'existe pas.");
 			
 			// Si la ressource est dans le classpath
 			if(resourceConfiguration.isInClassPath()) {
@@ -201,7 +201,7 @@ public class DroolsEngine {
 			throw new RuntimeException("Erreur lors du chargement des ressources metier : " + knowledgeBuilder.getErrors().toString());
 		}
 		
-		// Configuration de la base de connaissance
+		// Configuration de la knowledgeBaseName de connaissance
 		org.drools.KnowledgeBaseConfiguration droolsKnowledgeBaseConfiguration = KnowledgeBaseFactory.newKnowledgeBaseConfiguration();
 		
 		// Si on est en evaluation multithread
@@ -214,18 +214,18 @@ public class DroolsEngine {
 			droolsKnowledgeBaseConfiguration.setOption(MaxThreadsOption.get(knowledgeBaseConfiguration.getMaxEvaluationThreads()));
 		}
 		
-		// Instanciation de la base de connaissance
+		// Instanciation de la knowledgeBaseName de connaissance
 		KnowledgeBase knowledgeBase = KnowledgeBaseFactory.newKnowledgeBase(droolsKnowledgeBaseConfiguration);
 		
-		// Ajout des packages de connaissances dans la base
+		// Ajout des packages de connaissances dans la knowledgeBaseName
 		knowledgeBase.addKnowledgePackages(knowledgeBuilder.getKnowledgePackages());
 		
-		// On retourne la base de connaissances
+		// On retourne la knowledgeBaseName de connaissances
 		return knowledgeBase;
 	}
 	
 	/**
-	 * Methode permettant de construire la liste des bases de connaissance a partir de la base de connaissance configuree
+	 * Methode permettant de construire la liste des bases de connaissance a partir de la knowledgeBaseName de connaissance configuree
 	 * @param knowledgeBasesConfiguration	Configuration de la liste des bases de connaissance	
 	 */
 	private void buildKnowledgeBases(KnowledgeBasesConfiguration knowledgeBasesConfiguration) {
@@ -233,10 +233,10 @@ public class DroolsEngine {
 		// Parcours de la liste des configuration des bases de connaissances
 		for (KnowledgeBaseConfiguration knowledgeBaseConfiguration : knowledgeBasesConfiguration.getKnowledgeBase()) {
 			
-			// Obtention de la base de connaissance
+			// Obtention de la knowledgeBaseName de connaissance
 			KnowledgeBase knowledgeBase = buildKnowledgeBase(knowledgeBaseConfiguration);
 			
-			// Ajout de la base de connaissance dans la MAP des bases de connaissance
+			// Ajout de la knowledgeBaseName de connaissance dans la MAP des bases de connaissance
 			knowledgeBases.put(knowledgeBaseConfiguration.getName().trim(), knowledgeBase);
 		}
 	}
@@ -251,15 +251,15 @@ public class DroolsEngine {
 		// Base de connaissance drools a construire
 		KnowledgeBase knowledgeBase = null;
 		
-		// Obtention de la reference sur la base de connaissance
+		// Obtention de la reference sur la knowledgeBaseName de connaissance
 		KnowledgeBaseConfigurationRef knowledgeBaseConfigurationRef = knowledgeAgentConfiguration.getKnowledgeBaseRef();
 
-		// Recherche de la base de connaissance dans la MAP des bases de connaissances
+		// Recherche de la knowledgeBaseName de connaissance dans la MAP des bases de connaissances
 		knowledgeBase = this.knowledgeBases.get(knowledgeBaseConfigurationRef.getKnowledgeBase().trim());
 		
-		// Si la base de connaissance est nulle
+		// Si la knowledgeBaseName de connaissance est nulle
 		if(knowledgeBase == null) 
-			throw new RuntimeException("Erreur lors de la construction de l'agent intelligent : la base de connaissance referencee par '" + knowledgeBaseConfigurationRef.getKnowledgeBase() + "' n'existe pas.");
+			throw new RuntimeException("Erreur lors de la construction de l'agent intelligent : la knowledgeBaseName de connaissance referencee par '" + knowledgeBaseConfigurationRef.getKnowledgeBase() + "' n'existe pas.");
 		
 		// Configuration de l'agent intelligent
 		org.drools.agent.KnowledgeAgentConfiguration droolsKnowledgeAgentConfiguration = KnowledgeAgentFactory.newKnowledgeAgentConfiguration();
@@ -276,13 +276,13 @@ public class DroolsEngine {
 		// Positionnement de la periode de scan
 		droolsKnowledgeAgentConfiguration.setProperty("drools.agent.scanPeriod", Integer.toString(knowledgeAgentConfiguration.getScanPeriod()));
 		
-		// Positionnement de l'etat d'utilisation du classloader de la base de connaissance
+		// Positionnement de l'etat d'utilisation du classloader de la knowledgeBaseName de connaissance
 		droolsKnowledgeAgentConfiguration.setProperty("drools.agent.useKBaseClassLoaderForCompiling", Integer.toString(knowledgeAgentConfiguration.getScanPeriod()));
 		
 		// Construction de l'agent
 		KnowledgeAgent knowledgeAgent = KnowledgeAgentFactory.newKnowledgeAgent(knowledgeAgentConfiguration.getName(), knowledgeBase, droolsKnowledgeAgentConfiguration);
 		
-		// On retourne la base de connaissance issue de l'agent
+		// On retourne la knowledgeBaseName de connaissance issue de l'agent
 		return knowledgeAgent;
 	}
 	
@@ -316,15 +316,15 @@ public class DroolsEngine {
 		// Agent intelligent
 		KnowledgeAgent knowledgeAgent = null;
 		
-		// Si la reference a la base de connaissance est non nulle
+		// Si la reference a la knowledgeBaseName de connaissance est non nulle
 		if(knowledgeSessionConfiguration.getKnowledgeBaseRef() != null) {
 			
-			// Obtention de la base de connaissance depuis la MAP des bases de connaissances
+			// Obtention de la knowledgeBaseName de connaissance depuis la MAP des bases de connaissances
 			knowledgeBase = this.knowledgeBases.get(knowledgeSessionConfiguration.getKnowledgeBaseRef().getKnowledgeBase().trim());
 			
-			// Si la base de connaissance est nulle
+			// Si la knowledgeBaseName de connaissance est nulle
 			if(knowledgeBase == null) 
-				throw new RuntimeException("Erreur lors de la construction de la session intelligente (stateless) : la base de connaissance referencee par '" + knowledgeSessionConfiguration.getKnowledgeBaseRef().getKnowledgeBase() + "' n'existe pas.");
+				throw new RuntimeException("Erreur lors de la construction de la session intelligente (stateless) : la knowledgeBaseName de connaissance referencee par '" + knowledgeSessionConfiguration.getKnowledgeBaseRef().getKnowledgeBase() + "' n'existe pas.");
 			
 		} else {
 			
@@ -335,7 +335,7 @@ public class DroolsEngine {
 			if(knowledgeAgent == null)
 				throw new RuntimeException("Erreur lors de la construction de la session intelligente (stateless) : l'agent intelligent referencee par '" + knowledgeSessionConfiguration.getKnowledgeAgentRef().getKnowledgeAgent() + "' n'existe pas.");
 			
-			// Construction de la base de connaissance
+			// Construction de la knowledgeBaseName de connaissance
 			knowledgeBase = knowledgeAgent.getKnowledgeBase();
 			
 		}
@@ -370,15 +370,15 @@ public class DroolsEngine {
 		// Agent intelligent
 		KnowledgeAgent knowledgeAgent = null;
 		
-		// Si la reference a la base de connaissance est non nulle
+		// Si la reference a la knowledgeBaseName de connaissance est non nulle
 		if(knowledgeSessionConfiguration.getKnowledgeBaseRef() != null) {
 			
-			// Obtention de la base de connaissance depuis la MAP des bases de connaissances
+			// Obtention de la knowledgeBaseName de connaissance depuis la MAP des bases de connaissances
 			knowledgeBase = this.knowledgeBases.get(knowledgeSessionConfiguration.getKnowledgeBaseRef().getKnowledgeBase().trim());
 			
-			// Si la base de connaissance est nulle
+			// Si la knowledgeBaseName de connaissance est nulle
 			if(knowledgeBase == null) 
-				throw new RuntimeException("Erreur lors de la construction de la session intelligente (stateful) : la base de connaissance referencee par '" + knowledgeSessionConfiguration.getKnowledgeBaseRef().getKnowledgeBase() + "' n'existe pas.");
+				throw new RuntimeException("Erreur lors de la construction de la session intelligente (stateful) : la knowledgeBaseName de connaissance referencee par '" + knowledgeSessionConfiguration.getKnowledgeBaseRef().getKnowledgeBase() + "' n'existe pas.");
 			
 		} else {
 			
@@ -389,7 +389,7 @@ public class DroolsEngine {
 			if(knowledgeAgent == null)
 				throw new RuntimeException("Erreur lors de la construction de la session intelligente (stateful) : l'agent intelligent referencee par '" + knowledgeSessionConfiguration.getKnowledgeAgentRef().getKnowledgeAgent() + "' n'existe pas.");
 			
-			// Construction de la base de connaissance
+			// Construction de la knowledgeBaseName de connaissance
 			knowledgeBase = knowledgeAgent.getKnowledgeBase();
 			
 		}
@@ -709,23 +709,23 @@ public class DroolsEngine {
 	}
 	
 	/**
-	 * Methode permettant d'obtenir une base de connaissance
-	 * @param baseName	Nom de la base de connaissance
+	 * Methode permettant d'obtenir une knowledgeBaseName de connaissance
+	 * @param baseName	Nom de la knowledgeBaseName de connaissance
 	 * @return	Base de connaissance
 	 */
 	public KnowledgeBase getKnowledgeBase(String baseName) {
 		
-		// Si la base n'existe pas
+		// Si la knowledgeBaseName n'existe pas
 		if(!isBaseExists(baseName)) return null;
 		
-		// On retourne la base
+		// On retourne la knowledgeBaseName
 		return knowledgeBases.get(baseName.trim());
 	}
 	
 	/**
-	 * Methode permettant de tester si une base de connaissance existe
-	 * @param baseName	Nom de la base de connaissance
-	 * @return	Etat d'existence de la base de connaissance
+	 * Methode permettant de tester si une knowledgeBaseName de connaissance existe
+	 * @param baseName	Nom de la knowledgeBaseName de connaissance
+	 * @return	Etat d'existence de la knowledgeBaseName de connaissance
 	 */
 	public boolean isBaseExists(String baseName) {
 		
@@ -779,7 +779,7 @@ public class DroolsEngine {
 		// Obtention de l'agent
 		KnowledgeAgent knowledgeAgent = knowledgeAgents.get(agentName);
 		
-		// Obtention de la base de connaissance
+		// Obtention de la knowledgeBaseName de connaissance
 		KnowledgeBase knowledgeBase = knowledgeAgent.getKnowledgeBase();
 		
 		// Ajout de la session
@@ -821,7 +821,7 @@ public class DroolsEngine {
 		// Obtention de l'agent
 		KnowledgeAgent knowledgeAgent = knowledgeAgents.get(agentName);
 		
-		// Obtention de la base de connaissance
+		// Obtention de la knowledgeBaseName de connaissance
 		KnowledgeBase knowledgeBase = knowledgeAgent.getKnowledgeBase();
 		
 		// Ajout de la session
@@ -829,9 +829,9 @@ public class DroolsEngine {
 	}
 	
 	/**
-	 * Methode permettant de creer une session stateless a partir d'une base de connaissance
+	 * Methode permettant de creer une session stateless a partir d'une knowledgeBaseName de connaissance
 	 * @param sessionName	Nom de la session a creer
-	 * @param baseName	Nom de la base de connaissance source
+	 * @param baseName	Nom de la knowledgeBaseName de connaissance source
 	 * @param overwrite Etat d'ecrasement d'une session existante
 	 */
 	public void newStatelessSessionFromBase(String sessionName, String baseName, boolean overwrite) {
@@ -845,7 +845,7 @@ public class DroolsEngine {
 		// Si la session existe et qu'on ne doit pas ecraser
 		if(isSessionExists(sessionName) && !overwrite)  throw new RuntimeException("net.leadware.drools.engine.create.sessionfrombase.sessionexists.nooverwrite");
 		
-		// Obtention de la base de connaissance
+		// Obtention de la knowledgeBaseName de connaissance
 		KnowledgeBase knowledgeBase = knowledgeBases.get(baseName);
 		
 		// Ajout de la session
@@ -853,9 +853,9 @@ public class DroolsEngine {
 	}
 	
 	/**
-	 * Methode permettant de creer une session statefull a partir d'une base de connaissance
+	 * Methode permettant de creer une session statefull a partir d'une knowledgeBaseName de connaissance
 	 * @param sessionName	Nom de la session a creer
-	 * @param baseName	Nom de la base de connaissance
+	 * @param baseName	Nom de la knowledgeBaseName de connaissance
 	 * @param overwrite Etat d'ecrasement d'une session existante
 	 */
 	public void newStatefulSessionFromBase(String sessionName, String baseName, boolean overwrite) {
@@ -884,7 +884,7 @@ public class DroolsEngine {
 			}
 		}
 		
-		// Obtention de la base de connaissance
+		// Obtention de la knowledgeBaseName de connaissance
 		KnowledgeBase knowledgeBase = knowledgeBases.get(baseName);
 		
 		// Ajout de la session
@@ -936,17 +936,17 @@ public class DroolsEngine {
 	}
 	
 	/**
-	 * Methode d'execution d'une commandes batch sur une session creee sur une base de connaissace donnee
+	 * Methode d'execution d'une commandes batch sur une session creee sur une knowledgeBaseName de connaissace donnee
 	 * @param baseName Base de connaissance source
 	 * @param command	Commandes batch a executer
 	 * @return Map des resultats de l'execution de la liste de commandes
 	 */
 	public ExecutionResults executeOnBase(String baseName, BatchExecutionCommandImpl command) {
 		
-		// Si la base n'existe pas
+		// Si la knowledgeBaseName n'existe pas
 		if(!isBaseExists(baseName)) throw new RuntimeException("net.leadware.drools.engine.execute.commands.onbase.basenotfound");
 		
-		// Obtention de la base
+		// Obtention de la knowledgeBaseName
 		KnowledgeBase knowledgeBase = knowledgeBases.get(baseName.trim());
 		
 		// Creation de la session stateless
@@ -967,10 +967,10 @@ public class DroolsEngine {
 	 */
 	public ExecutionResults executeOnAgent(String agentName, BatchExecutionCommandImpl command) {
 		
-		// Si la base n'existe pas
+		// Si la knowledgeBaseName n'existe pas
 		if(!isAgentExists(agentName)) throw new RuntimeException("net.leadware.drools.engine.execute.commands.onagent.agentnotfound");
 		
-		// Obtention de la base
+		// Obtention de la knowledgeBaseName
 		KnowledgeBase knowledgeBase = knowledgeAgents.get(agentName.trim()).getKnowledgeBase();
 		
 		// Creation de la session stateless
@@ -1025,17 +1025,17 @@ public class DroolsEngine {
 	}
 
 	/**
-	 * Methode d'execution d'une liste de commandes sur une base de connaissance
-	 * @param baseName Nom de la base de connaissance source
+	 * Methode d'execution d'une liste de commandes sur une knowledgeBaseName de connaissance
+	 * @param baseName Nom de la knowledgeBaseName de connaissance source
 	 * @param commands	Liste de commandes a executer
 	 * @return Map des resultats de l'execution de la liste de commandes
 	 */
 	public ExecutionResults executeOnBase(String baseName, List<GenericCommand<?>> commands) {
 		
-		// Si la base n'existe pas
+		// Si la knowledgeBaseName n'existe pas
 		if(!isBaseExists(baseName)) throw new RuntimeException("net.leadware.drools.engine.execute.commands.onbase.basenotfound");
 		
-		// Obtention de la base
+		// Obtention de la knowledgeBaseName
 		KnowledgeBase knowledgeBase = knowledgeBases.get(baseName.trim());
 		
 		// Creation de la session stateless
@@ -1056,10 +1056,10 @@ public class DroolsEngine {
 	 */
 	public ExecutionResults executeOnAgent(String agentName, List<GenericCommand<?>> commands) {
 		
-		// Si la base n'existe pas
+		// Si la knowledgeBaseName n'existe pas
 		if(!isAgentExists(agentName)) throw new RuntimeException("net.leadware.drools.engine.execute.commands.onagent.agentnotfound");
 		
-		// Obtention de la base
+		// Obtention de la knowledgeBaseName
 		KnowledgeBase knowledgeBase = knowledgeAgents.get(agentName.trim()).getKnowledgeBase();
 		
 		// Creation de la session stateless

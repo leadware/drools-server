@@ -61,6 +61,18 @@
 		</restriction>
 	</simpleType>
 	
+	<!-- Configuration d'un chemin de classe -->
+	<complexType name="ClasspathConfiguration">
+		<attribute name="url" type="string" use="optional" default="." />
+	</complexType>
+	
+	<!-- Configuration de la liste des classpaths -->
+	<complexType name="ClassPathsConfiguration">
+		<sequence>
+			<element name="url" type="tns:ClasspathConfiguration" minOccurs="1" maxOccurs="unbounded" />
+		</sequence>
+	</complexType>
+	
 	<!-- Ressource -->
 	<complexType name="ResourceConfiguration">
 		<attribute name="name" type="string" use="required" />
@@ -150,6 +162,7 @@
 	<!-- Drools server configuration -->
 	<complexType name="DroolsServerConfiguration">
 		<sequence>
+			<element name="classpaths" type="tns:ClassPathsConfiguration" minOccurs="0" maxOccurs="1"/>
 			<element name="resources" type="tns:ResourcesConfiguration" minOccurs="1" maxOccurs="1"/>
 			<element name="knowledge-bases" type="tns:KnowledgeBasesConfiguration" minOccurs="1" maxOccurs="1"/>
 			<element name="knowledge-agents" type="tns:KnowledgeAgentsConfiguration" minOccurs="0" maxOccurs="1"/>

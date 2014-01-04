@@ -26,6 +26,7 @@ package net.leadware.drools.server.engine.test.engine;
  */
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -39,19 +40,10 @@ import net.leadware.drools.server.engine.DroolsEngine;
 import net.leadware.drools.server.tools.collection.CollectionHelper;
 
 import org.apache.log4j.Logger;
-import org.drools.KnowledgeBase;
-import org.drools.KnowledgeBaseFactory;
-import org.drools.builder.KnowledgeBuilder;
-import org.drools.builder.KnowledgeBuilderFactory;
-import org.drools.builder.ResourceType;
 import org.drools.command.runtime.BatchExecutionCommandImpl;
 import org.drools.command.runtime.SetGlobalCommand;
 import org.drools.command.runtime.rule.FireAllRulesCommand;
 import org.drools.command.runtime.rule.InsertObjectCommand;
-import org.drools.io.ResourceFactory;
-import org.drools.runtime.StatefulKnowledgeSession;
-import org.drools.runtime.StatelessKnowledgeSession;
-import org.drools.runtime.rule.AgendaGroup;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -98,7 +90,7 @@ public class DroolsEngineTest {
 	 * Test method for {@link net.leadware.drools.server.engine.DroolsEngine#start()}.
 	 * @throws ParseException Exception potentielle
 	 */
-	//@Test
+	@Test
 	public void testStart() throws ParseException {
 		
 		// Moteur Drools
@@ -124,10 +116,10 @@ public class DroolsEngineTest {
 		
 		// Verifications
 		assertTrue(droolsEngine.isSessionExists(sessionName));
-		assertTrue(droolsEngine.isStatefulSession((sessionName)));
+		assertTrue(droolsEngine.isStatelessSession((sessionName)));
 		
-		// Obtention de la session
-		StatefulKnowledgeSession knowledgeSession = (StatefulKnowledgeSession) droolsEngine.getKnowledgeSession(sessionName);
+		// Batch de commandes
+		BatchExecutionCommandImpl batch = new BatchExecutionCommandImpl();
 		
 		// Agent a valider
 		Agent agent = new Agent("", "YASHIRO", "NANAKAZE", dateformat.parse("28/03/1981"), "DG");
@@ -135,14 +127,26 @@ public class DroolsEngineTest {
 		// Variable globale
 		ValidationResult validationResult = new ValidationResult();
 		
-		// Positionnement de la variable globale
-		knowledgeSession.setGlobal("result", validationResult);
+		// Commande de positionnement d'une variable globale
+		SetGlobalCommand setResultGlobalCommand = new SetGlobalCommand("result", validationResult);
 		
-		// Insertion
-		knowledgeSession.insert(agent);
+		// Mise en place du nom de la variable en sortie
+		setResultGlobalCommand.setOutIdentifier(setResultGlobalCommand.getIdentifier());
+		
+		// Positionnement de la commande d'insertion d'une variable globale
+		batch.getCommands().add(setResultGlobalCommand);
+		
+		// Ajout de la commande d'Insertion
+		batch.getCommands().add(new InsertObjectCommand(agent));
+		
+		// Ajout de la commande d'execution
+		batch.getCommands().add(new FireAllRulesCommand());
+		
+		// Positionnement de la session d'exeution
+		batch.setLookup(sessionName);
 		
 		// Execution
-		knowledgeSession.fireAllRules();
+		droolsEngine.execute(batch);
 		
 		// Verification
 		assertNotNull(validationResult.getText());
@@ -152,6 +156,11 @@ public class DroolsEngineTest {
 		droolsEngine.stop();
 	}
 	
+	/**
+	 * Methode permettant d'effectuer les tests d'execution des donnees en masse sans ecriture sur les flux de sortie
+	 * @throws ParseException	Exception potentielle
+	 * @throws InterruptedException	Exception potentielle
+	 */
 	@Test
 	public void testMasseExecutionPas() throws ParseException, InterruptedException {
 		
@@ -173,17 +182,8 @@ public class DroolsEngineTest {
 		// Demarrage du moteur
 		droolsEngine.start();
 		
-		// Nom de la session
-		String sessionName = "printruleksession";
-		
-		// Obtention de la session
-		final StatefulKnowledgeSession knowledgeSession = (StatefulKnowledgeSession) droolsEngine.getKnowledgeSession(sessionName);
-		
-		// Variable globale
-		ValidationResult validationResult = new ValidationResult();
-		
-		// Positionnement de la variable globale
-		knowledgeSession.setGlobal("result", validationResult);
+		// Nom de la base
+		String baseName = "printrulekbase";
 		
 		// Liste totale des agents a process
 		final List<Agent> agents = new ArrayList<Agent>();
@@ -210,32 +210,39 @@ public class DroolsEngineTest {
 		// Splitting des listes
 		List<List<Agent>> subLists = CollectionHelper.splitList(agents, pas);
 		
-		List<MyThread> threads = new ArrayList<DroolsEngineTest.MyThread>();
+		// Liste des Threads d'Execution des regles sur les sous-listes d'agents
+		List<AgentExecutionThread> threads = new ArrayList<DroolsEngineTest.AgentExecutionThread>();
 		
 		// Parcours d'execution pas a pas
 		for(List<Agent> subList : subLists) {
 			
 			// Instanciation d'un Thread
-			MyThread t = new MyThread();
+			AgentExecutionThread agentExecutionThread = new AgentExecutionThread();
 			
 			// Positionnement de la sous-liste a traiter
-			t.setAgents(subList);
+			agentExecutionThread.setAgents(subList);
 			
-			// Positionnement de la base de connaissance a utiliser
-			t.setBase(droolsEngine.getKnowledgeBase("printrulekbase"));
+			// Positionnement de la knowledgeBaseName de connaissance a utiliser
+			agentExecutionThread.setKnowledgeBaseName(baseName);
+			
+			// Positionnement du moteur
+			agentExecutionThread.setDroolsEngine(droolsEngine);
 			
 			// Demarrage du process
-			t.start();
+			agentExecutionThread.start();
 			
 			// Ajout
-			threads.add(t);
+			threads.add(agentExecutionThread);
 		}
-
-		for (MyThread myThread : threads) {
+		
+		// Parcours de la liste des Thread d'execution
+		for (AgentExecutionThread agentExecutionThread : threads) {
 			
-			synchronized (myThread) {
-
-				if(myThread.isAlive()) myThread.wait();
+			// Synchronisation sur le Thread en cours
+			synchronized (agentExecutionThread) {
+				
+				// Si le Thread est encore actif
+				if(agentExecutionThread.isAlive()) agentExecutionThread.wait();
 			}
 		}
 		
@@ -249,84 +256,6 @@ public class DroolsEngineTest {
 		log.info("Taille de la liste de faits					:	" + size);
 		log.info("Quantite des donnees inseree dans la session	:	" + pas);
 		log.info("Durée d'execution des regles					:	" + (endProcess - startProcess)/(1000) + " Secondes");
-	}
-	
-	
-	
-	
-	
-	//@Test
-	public void testMasseExecutionPasUnitaire() throws ParseException, InterruptedException {
-		
-		// Moteur Drools
-		DroolsEngine droolsEngine = new DroolsEngine();
-		
-		// Positionnement du fichier de configuration
-		droolsEngine.setConfigurationPath("configurations/drools-server-configuration-test-07.xml");
-
-		// Positionnement de l'etat de recherche dans le classpath
-		droolsEngine.setInClasspath(true);
-		
-		// Positionnement de l'état de validation
-		droolsEngine.setValidateConfiguration(true);
-		
-		// Un log
-		log.info("Demarrage du moteur");
-		
-		// Demarrage du moteur
-		droolsEngine.start();
-		
-		// Nom de la session
-		String sessionName = "printruleksession";
-		
-		// Obtention de la session
-		final StatelessKnowledgeSession knowledgeSession = (StatelessKnowledgeSession) droolsEngine.getKnowledgeSession(sessionName);
-		
-		// Variable globale
-		ValidationResult validationResult = new ValidationResult();
-		
-		// Positionnement de la variable globale
-		knowledgeSession.setGlobal("result", validationResult);
-		
-		// Liste totale des agents a process
-		final List<Agent> agents = new ArrayList<Agent>();
-		
-		// Pas de decoupage
-		int pas = 1;
-		
-		// Un log
-		log.info("Construction de la liste globale");
-		
-		// Parcours pour initialisation de la liste globale
-		for(long i = 0; i <= size; i++) {
-			
-			// Ajout de l'agent i
-			agents.add(new Agent("MAT" + i, "Nom" + i, "Prenom" + i, dateformat.parse("28/03/1981"), "GRADE" + i));
-		}
-		
-		// Date/Heure de demarrage de l'execution
-		long startProcess = System.currentTimeMillis();
-		
-		// Un log
-		log.info("Execution de la liste de taille : " + size + ", en pas de : " + pas);
-		
-		// Parcours d'execution pas a pas
-		for(int i = 0; i <= size - pas + 1; i+=pas) {
-			
-			// Execution
-			knowledgeSession.execute(agents.subList(i, i+pas-1));
-		}
-
-		// Date/Heure de demarrage de l'execution
-		long endProcess = System.currentTimeMillis();
-		
-		// Log
-		log.info("Taille de la liste de faits					:	" + size);
-		log.info("Quantite des donnees inseree dans la session	:	" + pas);
-		log.info("Durée d'execution des regles					: 	" + (endProcess - startProcess)/(1000) + " Secondes");
-		
-		// Arret du moteur
-		droolsEngine.stop();
 	}
 	
 	/**
@@ -354,16 +283,30 @@ public class DroolsEngineTest {
 		// Demarrage du moteur
 		droolsEngine.start();
 		
-		// Nom de la session
-		String sessionName = "printruleksession";
+		// Nom de la session a creer
+		String newSessionName = "new-session-name";
+		
+		// Base de connaissance source
+		String baseName = "printrulekbase";
+		
+		// Verifions que cette session n'existe pas
+		assertFalse(droolsEngine.isSessionExists(newSessionName));
+		
+		// Verifions que la base existe
+		assertTrue(droolsEngine.isBaseExists(baseName));
+		
+		// Creation de la session
+		droolsEngine.newStatelessSessionFromBase(newSessionName, baseName, false);
+
+		// Verifions que cette session existe
+		assertTrue(droolsEngine.isSessionExists(newSessionName));
 		
 		// Variable globale
 		ValidationResult validationResult = new ValidationResult();
 		
-		SetGlobalCommand setGlobalCommand = new SetGlobalCommand();
-		setGlobalCommand.setIdentifier("result");
+		// Commande de positionnement de la variable globale
+		SetGlobalCommand setGlobalCommand = new SetGlobalCommand("result", validationResult);
 		setGlobalCommand.setOutIdentifier("result");
-		setGlobalCommand.setObject(validationResult);
 		
 		// Liste totale des agents a process
 		final List<Agent> agents = new ArrayList<Agent>();
@@ -395,7 +338,7 @@ public class DroolsEngineTest {
 
 			// Batch executor
 			BatchExecutionCommandImpl batch = new BatchExecutionCommandImpl();
-			batch.setLookup(sessionName);
+			batch.setLookup(newSessionName);
 			
 			// Ajout
 			batch.getCommands().add(setGlobalCommand);
@@ -424,71 +367,62 @@ public class DroolsEngineTest {
 		droolsEngine.stop();
 	}
 	
-	public static void main(String[] args) throws ParseException {
-		
-		KnowledgeBase base = KnowledgeBaseFactory.newKnowledgeBase();
-		
-		KnowledgeBuilder kb = KnowledgeBuilderFactory.newKnowledgeBuilder();
-		
-		kb.add(ResourceFactory.newClassPathResource("drools/testrule.drl"), ResourceType.DRL);
-		
+	/**
+	 * Classe representant le worker d'execution des regles sur une liste d'agents
+	 * @author <a href="mailto:jetune@leadware.net">Jean-Jacques ETUNE NGI</a>
+	 * @since 4 janv. 2014 - 10:19:34
+	 */
+	class AgentExecutionThread extends Thread {
 
-		// S'il y a des erreurs
-		if(kb.hasErrors()) {
-			
-			// On leve une exceprion
-			throw new RuntimeException("Erreur lors du chargement des ressources metier : " + kb.getErrors().toString());
-		}
+		/**
+		 * Moteur Drools
+		 */
+		private DroolsEngine droolsEngine = null;
 		
-		base.addKnowledgePackages(kb.getKnowledgePackages());
+		/**
+		 * Liste des agents a trater
+		 */
+		private List<Agent> agents = new ArrayList<Agent>();
 		
-		StatefulKnowledgeSession session = base.newStatefulKnowledgeSession();
+		/**
+		 * Nom de la base de connaissance sur laquelle on executera la commande
+		 */
+		private String knowledgeBaseName;
 		
-		AgendaGroup ag01 = session.getAgenda().getAgendaGroup("ag01");
-		AgendaGroup ag02 = session.getAgenda().getAgendaGroup("ag02");
-		
-		Agent agent = new Agent("MAT01", "NOM01", "PRENOM01", dateformat.parse("28/02/1981"), "DG");
-		
-		ag01.setFocus();
-		session.insert(agent);
-		
-		System.out.println("Agent avant la regle et l'agenda 01 : " + agent);
-		session.fireAllRules();
-		System.out.println("Agent apres la regle et l'agenda 01 : " + agent);
-		agent.setPrenom("PRENOM02");
-		System.out.println("Agent avant la regle et l'agenda 02 : " + agent);
-		ag02.setFocus();
-		session.fireAllRules();
-		
-	}
-	
-	class MyThread extends Thread {
-		
-		List<Agent> agents = new ArrayList<Agent>();
-		
-		KnowledgeBase base;
-		
+		/*
+		 * (non-Javadoc)
+		 * @see java.lang.Thread#run()
+		 */
 		@Override
 		public void run() {
 			
 			synchronized (this) {
 				
-				// Construction de la session sans etat
-				StatefulKnowledgeSession knowledgeSession = base.newStatefulKnowledgeSession();
-
-				// Positionnement de la variable globale
-				knowledgeSession.setGlobal("result", new ValidationResult());
+				// Batch de commandes
+				BatchExecutionCommandImpl batch = new BatchExecutionCommandImpl();
+				
+				// Commande globale
+				SetGlobalCommand setResultGlobalCommand = new SetGlobalCommand("result", new ValidationResult());
+				
+				// Nom de sortie
+				setResultGlobalCommand.setOutIdentifier("result");
+				
+				// Ajout de la commande variable globale
+				batch.getCommands().add(setResultGlobalCommand);
 				
 				// Parcours de la sous-liste
 				for(Agent agent : agents) {
 					
-					// Insertion
-					knowledgeSession.insert(agent);
+					// Commande d'insertion
+					batch.getCommands().add(new InsertObjectCommand(agent));
 				}
 				
-				// Execution
-				knowledgeSession.fireAllRules();
-
+				// Commande d'execution
+				batch.getCommands().add(new FireAllRulesCommand());
+				
+				// Excution du batch de commande sur un session construite sur la knowledgeBaseName
+				droolsEngine.executeOnBase(knowledgeBaseName, batch);
+				
 				// Notif
 				notify();
 			}
@@ -513,21 +447,39 @@ public class DroolsEngineTest {
 		}
 
 		/**
-		 * Methode d'obtention du champ "base"
-		 * @return champ "base"
+		 * Methode d'obtention du champ "knowledgeBaseName"
+		 * @return champ "knowledgeBaseName"
 		 */
-		public KnowledgeBase getBase() {
+		public String getKnowledgeBaseName() {
 			// Renvoi de la valeur du champ
-			return base;
+			return knowledgeBaseName;
 		}
 
 		/**
-		 * Methode de modification du champ "base"
-		 * @param base champ base a modifier
+		 * Methode de modification du champ "knowledgeBaseName"
+		 * @param knowledgeBaseName champ knowledgeBaseName a modifier
 		 */
-		public void setBase(KnowledgeBase base) {
+		public void setKnowledgeBaseName(String base) {
 			// Modification de la valeur du champ
-			this.base = base;
+			this.knowledgeBaseName = base;
+		}
+
+		/**
+		 * Methode d'obtention du champ "droolsEngine"
+		 * @return champ "droolsEngine"
+		 */
+		public DroolsEngine getDroolsEngine() {
+			// Renvoi de la valeur du champ
+			return droolsEngine;
+		}
+
+		/**
+		 * Methode de modification du champ "droolsEngine"
+		 * @param droolsEngine champ droolsEngine a modifier
+		 */
+		public void setDroolsEngine(DroolsEngine droolsEngine) {
+			// Modification de la valeur du champ
+			this.droolsEngine = droolsEngine;
 		}
 		
 	}

@@ -39,16 +39,16 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for KnowledgeAgentsConfiguration complex type.
+ * <p>Java class for ClassPathsConfiguration complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="KnowledgeAgentsConfiguration">
+ * &lt;complexType name="ClassPathsConfiguration">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="knowledge-agent" type="{http://www.leadware.net/drools-server-configuration}KnowledgeAgentConfiguration" maxOccurs="unbounded"/>
+ *         &lt;element name="url" type="{http://www.leadware.net/drools-server-configuration}ClasspathConfiguration" maxOccurs="unbounded"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -58,41 +58,41 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "KnowledgeAgentsConfiguration", namespace = "http://www.leadware.net/drools-server-configuration", propOrder = {
-    "knowledgeAgent"
+@XmlType(name = "ClassPathsConfiguration", namespace = "http://www.leadware.net/drools-server-configuration", propOrder = {
+    "url"
 })
-public class KnowledgeAgentsConfiguration {
+public class ClassPathsConfiguration {
 
-    @XmlElement(name = "knowledge-agent", namespace = "http://www.leadware.net/drools-server-configuration", required = true)
-    protected List<KnowledgeAgentConfiguration> knowledgeAgent;
+    @XmlElement(namespace = "http://www.leadware.net/drools-server-configuration", required = true)
+    protected List<ClasspathConfiguration> url;
 
     /**
-     * Gets the value of the knowledgeAgent property.
+     * Gets the value of the url property.
      * 
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the knowledgeAgent property.
+     * This is why there is not a <CODE>set</CODE> method for the url property.
      * 
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
-     *    getKnowledgeAgent().add(newItem);
+     *    getUrl().add(newItem);
      * </pre>
      * 
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link KnowledgeAgentConfiguration }
+     * {@link ClasspathConfiguration }
      * 
      * 
      */
-    public List<KnowledgeAgentConfiguration> getKnowledgeAgent() {
-        if (knowledgeAgent == null) {
-            knowledgeAgent = new ArrayList<KnowledgeAgentConfiguration>();
+    public List<ClasspathConfiguration> getUrl() {
+        if (url == null) {
+            url = new ArrayList<ClasspathConfiguration>();
         }
-        return this.knowledgeAgent;
+        return this.url;
     }
 
 }

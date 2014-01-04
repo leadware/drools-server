@@ -64,8 +64,7 @@ public class DroolsServerConfigurationInitializerTest {
 	 * @throws java.lang.Exception	Exception potentielle
 	 */
 	@After
-	public void tearDown() throws Exception {
-	}
+	public void tearDown() throws Exception {}
 
 	/**
 	 * Test method for {@link net.leadware.drools.server.engine.configuration.DroolsServerConfigurationInitializer#initConfiguration()}.

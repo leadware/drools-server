@@ -30,60 +30,62 @@ package net.leadware.drools.server.model.configuration;
  * #L%
  */
 
-import javax.xml.bind.annotation.XmlEnum;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for ResourceTypeConfiguration.
+ * <p>Java class for ClasspathConfiguration complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
- * <p>
+ * 
  * <pre>
- * &lt;simpleType name="ResourceTypeConfiguration">
- *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string">
- *     &lt;enumeration value="DRL"/>
- *     &lt;enumeration value="XDRL"/>
- *     &lt;enumeration value="DSL"/>
- *     &lt;enumeration value="DSLR"/>
- *     &lt;enumeration value="DRF"/>
- *     &lt;enumeration value="DTABLE"/>
- *     &lt;enumeration value="BRL"/>
- *     &lt;enumeration value="PKG"/>
- *     &lt;enumeration value="PMML"/>
- *     &lt;enumeration value="XSD"/>
- *     &lt;enumeration value="DESCR"/>
- *     &lt;enumeration value="CHANGE_SET"/>
- *     &lt;enumeration value="BPMN"/>
- *   &lt;/restriction>
- * &lt;/simpleType>
+ * &lt;complexType name="ClasspathConfiguration">
+ *   &lt;complexContent>
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
+ *       &lt;attribute name="url" type="{http://www.w3.org/2001/XMLSchema}string" default="." />
+ *     &lt;/restriction>
+ *   &lt;/complexContent>
+ * &lt;/complexType>
  * </pre>
  * 
+ * 
  */
-@XmlType(name = "ResourceTypeConfiguration", namespace = "http://www.leadware.net/drools-server-configuration")
-@XmlEnum
-public enum ResourceTypeConfiguration {
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(name = "ClasspathConfiguration", namespace = "http://www.leadware.net/drools-server-configuration")
+public class ClasspathConfiguration {
 
-    DRL,
-    XDRL,
-    DSL,
-    DSLR,
-    DRF,
-    DTABLE,
-    BRL,
-    PKG,
-    PMML,
-    XSD,
-    DESCR,
-    CHANGE_SET,
-    BPMN;
+    @XmlAttribute(name = "url")
+    protected String url;
 
-    public String value() {
-        return name();
+    /**
+     * Gets the value of the url property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getUrl() {
+        if (url == null) {
+            return ".";
+        } else {
+            return url;
+        }
     }
 
-    public static ResourceTypeConfiguration fromValue(String v) {
-        return valueOf(v);
+    /**
+     * Sets the value of the url property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setUrl(String value) {
+        this.url = value;
     }
 
 }
