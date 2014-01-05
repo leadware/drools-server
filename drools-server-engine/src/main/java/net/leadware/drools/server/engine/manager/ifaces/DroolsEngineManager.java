@@ -39,6 +39,11 @@ import org.drools.runtime.ExecutionResults;
 public interface DroolsEngineManager {
 	
 	/**
+	 * Nom du service
+	 */
+	public static final String SERVICE_NAME = "DroolsEngineManager";
+	
+	/**
 	 * Methode permettant de tester si une session existe
 	 * @param sessionName	Nom de la session
 	 * @return	Etat d'existence de la session
