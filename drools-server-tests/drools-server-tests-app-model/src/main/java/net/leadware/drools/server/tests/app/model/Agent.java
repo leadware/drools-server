@@ -1,7 +1,7 @@
 /**
  * 
  */
-package net.leadware.drools.server.engine.test.engine;
+package net.leadware.drools.server.tests.app.model;
 
 /*
  * #%L
@@ -31,7 +31,7 @@ import java.util.Date;
 /**
  * Classe representant un Agent de l'etat 
  * @author <a href="mailto:jetune@leadware.net">Jean-Jacques ETUNE NGI</a>
- * @since 26 déc. 2013 - 13:30:00
+ * @since 10 févr. 2014 - 19:03:07
  */
 public class Agent implements Serializable {
 

@@ -58,7 +58,7 @@ public class DroolsEngineTest {
 	/**
 	 *  Taille totale de la liste des agents
 	 */
-	private long size = 2000000;
+	private long size = 20000;
 	
 	/**
 	 * Logger de la classe
