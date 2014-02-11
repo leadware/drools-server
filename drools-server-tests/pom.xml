@@ -46,5 +46,8 @@
 	
   <modules>
     <module>drools-server-tests-app-model</module>
+	<module>drools-server-tests-app-business-brms-ifaces</module>
+	<module>drools-server-tests-app-business-brms-impl</module>
   </modules>
+  
 </project>

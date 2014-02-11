@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  #%L
+  DROOLS SERVER
+  $Id:$
+  $HeadURL:$
+  %%
+  Copyright (C) 2013 - 2014 Leadware
+  %%
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+  
+       http://www.apache.org/licenses/LICENSE-2.0
+  
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+  #L%
+  -->
+
+
+<!-- Configuration serveur drools -->
+<drools-server xmlns="http://www.leadware.net/drools-server-configuration" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.leadware.net/drools-server-configuration http://www.leadware.net/drools-server-configuration ">
+	
+	<!-- Liste des ressources metier du referentiel de l'application -->
+	<resources>
+		<resource name="rules.calculValeurCle.indices" path="rules/calculValeurCle/indices.drl"/>
+		<resource name="rules.calculValeurCle.nombreParts" path="rules/calculValeurCle/nombreParts.drl"/>
+		<resource name="rules.irpp.indices" path="rules/calculValeurCle/indices.drl"/>
+		<resource name="rules.irpp.irpp" path="rules/irpp/IrppFinal.drl"/>
+		<resource name="rules.p19bulletinFactory" path="rules/p19bulletinFactory/bulletinFactory.drl"/>
+		<resource name="rules.p20ElementVariable" path="rules/p20ElementVariable/elementPeriodiqueGain.drl"/>
+		<resource name="rules.p21ElementDeSalaire.p2101" path="rules/p21ElementDeSalaire/p2101SalaireDeBase.drl"/>
+		<resource name="rules.p21ElementDeSalaire.p2103" path="rules/p21ElementDeSalaire/p2103IndemniteCompensatrice.drl"/>
+		<resource name="rules.p21ElementDeSalaire.p2105" path="rules/p21ElementDeSalaire/p2105PrimeDanciennete.drl"/>
+		<resource name="rules.p21ElementDeSalaire.p2106" path="rules/p21ElementDeSalaire/p2106PrimeDexpatriation.drl"/>
+		<resource name="rules.p21ElementDeSalaire.p2107" path="rules/p21ElementDeSalaire/p2107BourseStage.drl"/>
+		<resource name="rules.p21ElementDeSalaire.p2120" path="rules/p21ElementDeSalaire/p2120SalaireUnique.drl"/>
+		<resource name="rules.p21ElementDeSalaire.p2121" path="rules/p21ElementDeSalaire/p2121AllocationsFamilliales.drl"/>
+		<resource name="rules.p21ElementDeSalaire.p2122" path="rules/p21ElementDeSalaire/p2122SupplementFamillial.drl"/>
+		<resource name="rules.p22IndemnitesGrade.p2201" path="rules/p22IndemnitesGrade/p2201ChargeMilitaire.drl"/>
+		<resource name="rules.p22IndemnitesGrade.p2202" path="rules/p22IndemnitesGrade/p2202IndemniteRemise.drl"/>
+		<resource name="rules.p22IndemnitesGrade.p2203" path="rules/p22IndemnitesGrade/p2203PrimeProduction.drl"/>
+		<resource name="rules.p22IndemnitesGrade.p2204" path="rules/p22IndemnitesGrade/p2204MaintienPoste.drl"/>
+		<resource name="rules.p22IndemnitesGrade.p2209" path="rules/p22IndemnitesGrade/p2209AutreIndemnite.drl"/>
+		<resource name="rules.p23IndemnitesEmploi.p2301" path="rules/p23IndemnitesEmploi/p230113EmeMois.drl"/>
+		<resource name="rules.p23IndemnitesEmploi.p2302" path="rules/p23IndemnitesEmploi/p2302IndemResPecu.drl"/>
+		<resource name="rules.p23IndemnitesEmploi.p2303" path="rules/p23IndemnitesEmploi/p2303IndemniteRemise.drl"/>
+		<resource name="rules.p23IndemnitesEmploi.p2304" path="rules/p23IndemnitesEmploi/p2304PrimeProduction.drl"/>
+		<resource name="rules.p23IndemnitesEmploi.p2305" path="rules/p23IndemnitesEmploi/p2305MaintienPoste.drl"/>
+		<resource name="rules.p23IndemnitesEmploi.p2306" path="rules/p23IndemnitesEmploi/p2306IndeminiteLogement.drl"/>
+		<resource name="rules.p23IndemnitesEmploi.p2307" path="rules/p23IndemnitesEmploi/p2307Indemnite617.drl"/>
+		<resource name="rules.p23IndemnitesEmploi.p2308" path="rules/p23IndemnitesEmploi/p2308IndemniteEmploi.drl"/>
+		<resource name="rules.p23IndemnitesEmploi.p2309" path="rules/p23IndemnitesEmploi/p2309AutreIndemnite.drl"/>
+		<resource name="rules.p24IndemnitesService.p2401" path="rules/p24IndemnitesService/p2401PrimeProduction.drl"/>
+		<resource name="rules.p24IndemnitesService.P2409" path="rules/p24IndemnitesService/p2409AutreIndemnite.drl"/>
+		<resource name="rules.p25IndemnitesResidence.p2501" path="rules/p25IndemnitesResidence/p2501-IndemniteRegionale.drl"/>
+		<resource name="rules.p26AutrePrime.p2601" path="rules/p26AutrePrime/P2601_PrimeTransport.drl"/>
+		<resource name="rules.p27QuotiteSaisissable.p2701" path="rules/p27QuotiteSaisissable/p2701AquotiteSaisissable.drl"/>
+		<resource name="rules.p28ElementsVariablesEtRetenuesAutomatiques.p2804" path="rules/p28ElementsVariablesEtRetenuesAutomatiques/p2804RetenueRappel.drl"/>
+		<resource name="rules.p28ElementsVariablesEtRetenuesAutomatiques.p2805" path="rules/p28ElementsVariablesEtRetenuesAutomatiques/p2805EppRetenue.drl"/>
+		<resource name="rules.p28ElementsVariablesEtRetenuesAutomatiques.p28061" path="rules/p28ElementsVariablesEtRetenuesAutomatiques/p28061RetenueRFP.drl"/>
+		<resource name="rules.p28ElementsVariablesEtRetenuesAutomatiques.p28062" path="rules/p28ElementsVariablesEtRetenuesAutomatiques/p28062RetnueCNPS.drl"/>
+		<resource name="rules.p28ElementsVariablesEtRetenuesAutomatiques.p2807" path="rules/p28ElementsVariablesEtRetenuesAutomatiques/p2807RetenueDiverse.drl"/>
+		<resource name="rules.p28ElementsVariablesEtRetenuesAutomatiques.p28081" path="rules/p28ElementsVariablesEtRetenuesAutomatiques/p28081PartPatronaleRFP.drl"/>
+		<resource name="rules.p28ElementsVariablesEtRetenuesAutomatiques.p28082" path="rules/p28ElementsVariablesEtRetenuesAutomatiques/p28082PartPatronaleCNPS.drl"/>
+		<resource name="rules.p29PartsPatronales.elementPeriodiqueRetenue" path="rules/p29PartsPatronales/elementPeriodiqueRetenue.drl"/>
+		<resource name="rules.p30NetAPayer.p3001" path="rules/p30NetAPayer/P3001_NetAPayer.drl"/>
+	</resources>
+	
+	<!-- Liste des bases de connaissances de l'application -->
+	<knowledge-bases>
+		
+		<!-- Base de connaissance de calcul de la solde -->
+		<knowledge-base name="kbase-calcul-solde">
+			<resource-ref resource-name="rules.p19bulletinFactory"/>
+			<resource-ref resource-name="rules.p20ElementVariable"/>
+			<resource-ref resource-name="rules.calculValeurCle.nombreParts"/>
+			<resource-ref resource-name="rules.p21ElementDeSalaire.p2101"/>
+			<resource-ref resource-name="rules.p21ElementDeSalaire.p2120"/>
+			<resource-ref resource-name="rules.p21ElementDeSalaire.p2105"/>
+			<resource-ref resource-name="rules.p21ElementDeSalaire.p2106"/>
+			<resource-ref resource-name="rules.p21ElementDeSalaire.p2107"/>
+			<resource-ref resource-name="rules.p21ElementDeSalaire.p2103"/>
+			<resource-ref resource-name="rules.p21ElementDeSalaire.p2122"/>
+			<resource-ref resource-name="rules.p21ElementDeSalaire.p2121"/>
+			<resource-ref resource-name="rules.p22IndemnitesGrade.p2201"/>
+			<resource-ref resource-name="rules.p22IndemnitesGrade.p2202"/>
+			<resource-ref resource-name="rules.p22IndemnitesGrade.p2204"/>
+			<resource-ref resource-name="rules.p22IndemnitesGrade.p2203"/>
+			<resource-ref resource-name="rules.p22IndemnitesGrade.p2209"/>
+			<resource-ref resource-name="rules.p23IndemnitesEmploi.p2303"/>
+			<resource-ref resource-name="rules.p23IndemnitesEmploi.p2302"/>
+			<resource-ref resource-name="rules.p23IndemnitesEmploi.p2304"/>
+			<resource-ref resource-name="rules.p23IndemnitesEmploi.p2305"/>
+			<resource-ref resource-name="rules.p23IndemnitesEmploi.p2307"/>
+			<resource-ref resource-name="rules.p23IndemnitesEmploi.p2306"/>
+			<resource-ref resource-name="rules.p23IndemnitesEmploi.p2309"/>
+			<resource-ref resource-name="rules.p24IndemnitesService.p2401"/>
+			<resource-ref resource-name="rules.p24IndemnitesService.P2409"/>
+			<resource-ref resource-name="rules.p25IndemnitesResidence.p2501"/>
+			<resource-ref resource-name="rules.p26AutrePrime.p2601"/>
+			<resource-ref resource-name="rules.p27QuotiteSaisissable.p2701"/>
+			<resource-ref resource-name="rules.p28ElementsVariablesEtRetenuesAutomatiques.p28061"/>
+			<resource-ref resource-name="rules.p28ElementsVariablesEtRetenuesAutomatiques.p28062"/>
+			<resource-ref resource-name="rules.p28ElementsVariablesEtRetenuesAutomatiques.p28081"/>
+			<resource-ref resource-name="rules.p28ElementsVariablesEtRetenuesAutomatiques.p28082"/>
+			<resource-ref resource-name="rules.irpp.irpp"/>
+			<resource-ref resource-name="rules.p29PartsPatronales.elementPeriodiqueRetenue"/>
+			<resource-ref resource-name="rules.p30NetAPayer.p3001"/>
+		</knowledge-base>
+	</knowledge-bases>
+	
+	<!-- Liste des agents intelligents de monitoring de la base de connaissance -->
+	<knowledge-agents>
+		
+		<!-- Agent intelligent de monitoring des regles de calcul de la solde -->
+		<knowledge-agent name="kagent-calcul-solde">
+			<knowledge-base-ref knowledge-base="kbase-calcul-solde"/>
+		</knowledge-agent>
+	</knowledge-agents>
+	
+	<!-- Liste des sessions statiques de l'application -->
+	<knowledge-sessions>
+		
+		<!-- Session de calcul de la solde -->
+		<knowledge-session name="ksession-calcul-solde" type="STATEFUL">
+			<knowledge-agent-ref knowledge-agent="kagent-calcul-solde"/>
+		</knowledge-session>
+		
+	</knowledge-sessions>
+</drools-server>
